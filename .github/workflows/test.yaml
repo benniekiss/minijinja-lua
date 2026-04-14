@@ -1,0 +1,65 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lx-test:
+    name: ${{ matrix.job.target }} - Lua ${{ matrix.lua_version }}
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ## Only run tests on Linux and Lua 5.4 for now.
+        ## There are issues with installing deps in the runner.
+        job:
+          - { os: ubuntu-24.04, target: x86_64-linux }
+          - { os: ubuntu-24.04-arm, target: aarch64-linux }
+          # - { os: macos-14, target: aarch64-darwin }
+          # - { os: windows-2025, target: x86_63-windows-msvc }
+        lua_version:
+          # - 5.1
+          # - 5.2
+          # - 5.3
+          - 5.4
+          # - 5.5
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install MSVC Compiler Toolchain
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        if: endsWith(matrix.job.target, '-msvc')
+
+      - name: Setup Lux
+        uses: lumen-oss/gh-actions-lux@d12a6bdf3a380de5b9d142272e6fd95d28b44b8d # v1
+
+      - name: Run tests
+        run: |
+          lx --lua-version ${{ matrix.lua_version }} test
+
+  cargo-test:
+    name: cargo tests
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: true
+      matrix:
+        lua_version:
+          - lua51
+          - lua52
+          - lua53
+          - lua54
+          - lua55
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@150fca883cd4034361b621bd4e6a9d34e5143606 # v1
+
+      - name: Run tests
+        run: cargo test --no-default-features --features=${{ matrix.lua_version }},vendored

@@ -1,0 +1,30 @@
+name: Renovate
+
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log Level'
+        required: true
+        default: 'info'
+        type: choice
+        options:
+          - info
+          - debug
+          - warning
+  schedule:
+    - cron: '0 8 */3 * *'
+
+jobs:
+  renovate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run renovate
+        uses: renovatebot/github-action@eb932558ad942cccfd8211cf535f17ff183a9f74 # v46.1.9
+        env:
+          LOG_LEVEL: ${{ inputs.logLevel }}
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+        with:
+          token: ${{ secrets.RENOVATE_TOKEN }}
