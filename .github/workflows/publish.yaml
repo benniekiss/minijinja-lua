@@ -2,17 +2,79 @@ name: Publish package
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "*"
-
-env:
-  LUA_VERSION: 5.4
-  LUX_VERSION: 0.28.0
+  release:
+    types: [published]
 
 jobs:
+  build:
+    name: ${{ matrix.job.target }} - Lua ${{ matrix.lua_version }}
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+          - { os: ubuntu-24.04, target: x86_64-linux }
+          - { os: ubuntu-24.04-arm, target: aarch64-linux }
+          - { os: macos-14, target: aarch64-darwin }
+          - { os: windows-2025, target: x86_63-windows-msvc }
+        lua_version:
+          - lua51
+          - lua52
+          - lua53
+          - lua54
+          - lua55
+
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_NET_GIT_FETCH_WITH_CLI: true
+      CARGO_NET_RETRY: 10
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: 1
+      RUSTFLAGS: -D warnings
+      RUSTUP_MAX_RETRIES: 10
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install MSVC Compiler Toolchain
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        if: endsWith(matrix.job.target, '-msvc')
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
+
+      - name: Build
+        run: |
+          cargo build --target . --release --no-default-features --features module,${{ matrix.lua_version }}
+
+      - name: Rename for Lua
+        if: endsWith(matrix.job.target, '-darwin')
+        run: |
+          cp libminijinja_lua.dylib minijinja.so
+
+      - name: Rename for Lua
+        if: endsWith(matrix.job.target, '-linux')
+        run: |
+          cp libminijinja_lua.so minijinja.so
+
+      - name: Rename for Lua
+        if: endsWith(matrix.job.target, '-msvc')
+        run: |
+          cp libminijinja_lua.dll minijinja.dll
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.job.target }}-${{ matrix.lua_version }}
+          path: "minijinja.so"
+          if-no-files-found: "error"
+
   luarocks-upload:
     runs-on: ubuntu-24.04
+
+    env:
+      LUA_VERSION: 5.4
+      LUX_VERSION: 0.28.0
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
