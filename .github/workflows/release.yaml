@@ -33,7 +33,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
 
       - name: Generate GitHub token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3
         id: generate-token
         with:
           app-id: ${{ secrets.RELEASE_PLZ_APP_ID }}
@@ -70,7 +70,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
 
       - name: Generate GitHub token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3
         id: generate-token
         with:
           app-id: ${{ secrets.RELEASE_PLZ_APP_ID }}
