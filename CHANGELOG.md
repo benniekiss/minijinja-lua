@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1](https://github.com/benniekiss/minijinja-lua/compare/v0.1.0...v0.1.1) - 2026-04-14
+
+### Other
+
+- add gpg package signing
+- set lua version
+- update lux.toml source urls
+- update readme
+- add dev url to lux.toml
+- release v0.1.0 ([#5](https://github.com/benniekiss/minijinja-lua/pull/5))
+
 ## [0.1.0](https://github.com/benniekiss/minijinja-lua/releases/tag/v0.1.0) - 2026-04-14
 
 ### Added
