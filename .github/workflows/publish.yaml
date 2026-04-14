@@ -3,8 +3,8 @@ name: Publish
 on:
   workflow_dispatch:
     inputs:
-      skip_luarocks:
-        description: 'Skip luarocks upload'
+      skip_upload:
+        description: 'Skip upload'
         required: true
         default: true
         type: boolean
@@ -75,8 +75,24 @@ jobs:
           path: "minijinja.so"
           if-no-files-found: "error"
 
+  upload:
+    if: ${{ !inputs.skip_upload }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+
+      - name: Upload
+        uses: softprops/action-gh-release@v3
+        if: github.ref_type == 'tag'
+        with:
+          working_directory: dist
+          files: |
+            Release.txt
+            checksums/*.txt
+
   luarocks-upload:
-    if: ${{ !inputs.skip_luarocks }}
+    if: ${{ !inputs.skip_upload }}
     runs-on: ubuntu-24.04
 
     env:
