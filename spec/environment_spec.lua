@@ -278,6 +278,33 @@ describe("Environment tests", function()
 			assert.Equal("foo", env:render_str(source))
 		end)
 
+		it("fuel#templates", function()
+			local env = Environment:new()
+			local source = "{% for i in ['' * 10] %}{{ i | fuel_check }}{% endfor %}"
+			local fuel = 10
+
+			local function fuel_check(state, _)
+				local c, r = table.unpack(state:fuel_levels())
+				local total = c + r
+				assert.Equal(fuel, total)
+				assert.True(c < total)
+			end
+
+			env:add_filter("fuel_check", fuel_check)
+
+			env.fuel = fuel
+			assert.Equal(fuel, env.fuel)
+			assert.Not.Error(function()
+				env:render_str(source)
+			end)
+
+			env.fuel = fuel / 2
+			assert.Equal(fuel / 2, env.fuel)
+			assert.match_error(function()
+				env:render_str(source)
+			end, "engine ran out of fuel")
+		end)
+
 		it("undeclared-variables#templates", function()
 			local env = Environment:new()
 

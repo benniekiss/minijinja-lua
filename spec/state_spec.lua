@@ -19,13 +19,20 @@ describe("State tests", function()
 		assert.Equal("HELLO", state:apply_filter("state_filter", "hello"))
 		assert.Equal(false, state:perform_test("state_test", "foo", "bar"))
 		assert.Equal("[1, 2, 3]", state:format({ 1, 2, 3 }))
-		assert.Equal(minijinja.None, state:fuel_levels())
+
+		local c, r = table.unpack(state:fuel_levels())
+		local total = c + r
+		assert.Equal(1000, total)
+		assert.True(c < total)
 
 		return true
 	end
 
 	local function setup(src)
 		local env = Environment:empty()
+
+		env.fuel = 1000
+
 		env:add_global("lua", state_func)
 		env:add_filter("state_filter", function(val)
 			return val:upper()
