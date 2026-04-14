@@ -1,7 +1,13 @@
-name: Publish package
+name: Publish
 
 on:
   workflow_dispatch:
+    inputs:
+      skip_luarocks:
+        description: 'Skip luarocks upload'
+        required: true
+        default: true
+        type: boolean
   release:
     types: [published]
 
@@ -45,7 +51,7 @@ jobs:
 
       - name: Build
         run: |
-          cargo build --target . --release --no-default-features --features module,${{ matrix.lua_version }}
+          cargo build --target-dir . --release --no-default-features --features module,${{ matrix.lua_version }}
 
       - name: Rename for Lua
         if: endsWith(matrix.job.target, '-darwin')
@@ -70,6 +76,7 @@ jobs:
           if-no-files-found: "error"
 
   luarocks-upload:
+    if: ${{ !inputs.skip_luarocks }}
     runs-on: ubuntu-24.04
 
     env:
