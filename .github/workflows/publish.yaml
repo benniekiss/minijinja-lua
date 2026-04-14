@@ -8,6 +8,7 @@ on:
 
 env:
   LUA_VERSION: 5.4
+  LUX_VERSION: 0.28.0
 
 jobs:
   luarocks-upload:
@@ -16,8 +17,16 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
       - name: Setup Lux
         uses: lumen-oss/gh-actions-lux@d12a6bdf3a380de5b9d142272e6fd95d28b44b8d # v1
+        with:
+          version: ${{ env.LUX_VERSION }}
 
       - name: Upload
         env:
