@@ -10,8 +10,8 @@ labels = [ "jinja", "minijinja", "template", "rust", "bindings" ]
 license = "MIT"
 
 [source]
-url = "https://github.com/benniekiss/$(PACKAGE)"
-dev = "https://github.com/benniekiss/$(PACKAGE)"
+url = "https://github.com/benniekiss/$(PACKAGE)/archive/refs/tags/$(REF).zip"
+dev = "git+https://github.com/benniekiss/$(PACKAGE)"
 
 [build]
 type = "rust-mlua"
