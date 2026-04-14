@@ -49,8 +49,6 @@ PRs.
 #### AI Policy
 
 AI is not allowed for communication, such as PR or issue report body content.
-This includes translations. Maintainers can rely on their own trusted
-translation tools.
 
 #### Getting Started
 
