@@ -90,6 +90,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           fail_on_unmatched_files: true
+          merge-multiple: true
           files: |
             minijinja-*.zip
 
