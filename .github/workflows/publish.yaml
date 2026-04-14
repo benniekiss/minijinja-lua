@@ -19,10 +19,10 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          - { os: ubuntu-24.04, target: x86_64-linux }
-          - { os: ubuntu-24.04-arm, target: aarch64-linux }
-          - { os: macos-14, target: aarch64-darwin }
-          - { os: windows-2025, target: x86_63-windows-msvc }
+          - { os: ubuntu-24.04, target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu }
+          - { os: macos-14, target: aarch64-apple-darwin }
+          - { os: windows-2025, target: x86_64-pc-windows-msvc }
         lua_version:
           - lua51
           - lua52
@@ -42,26 +42,24 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Install MSVC Compiler Toolchain
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
-        if: endsWith(matrix.job.target, '-msvc')
-
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
+        with:
+          target: ${{ matrix.job.target }}
 
       - name: Build
         run: |
           cargo build --release --no-default-features --features module,${{ matrix.lua_version }}
 
       - name: Rename for Lua
+        if: endsWith(matrix.job.target, '-gnu')
+        run: |
+          cp target/release/libminijinja_lua.so minijinja-${{ matrix.job.target }}-${{ matrix.lua_version }}.so
+
+      - name: Rename for Lua
         if: endsWith(matrix.job.target, '-darwin')
         run: |
           cp target/release/libminijinja_lua.dylib minijinja-${{ matrix.job.target }}-${{ matrix.lua_version }}.so
-
-      - name: Rename for Lua
-        if: endsWith(matrix.job.target, '-linux')
-        run: |
-          cp target/release/libminijinja_lua.so minijinja-${{ matrix.job.target }}-${{ matrix.lua_version }}.so
 
       - name: Rename for Lua
         if: endsWith(matrix.job.target, '-msvc')
@@ -84,7 +82,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v8
 
-      - name: Upload
+      - name: Upload release
         uses: softprops/action-gh-release@v3
         if: github.ref_type == 'tag'
         with:
@@ -115,7 +113,7 @@ jobs:
         with:
           version: ${{ env.LUX_VERSION }}
 
-      - name: Upload
+      - name: Upload rock
         env:
           LUX_API_KEY: ${{ secrets.LUX_API_KEY }}
         run: lx --lua-version ${{ env.LUA_VERSION }} upload
