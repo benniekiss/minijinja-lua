@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.job.target }} - Lua ${{ matrix.lua_version }}
+    name: ${{ matrix.job.target }}-${{ matrix.lua_version }}
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -51,22 +51,22 @@ jobs:
 
       - name: Build
         run: |
-          cargo build --target-dir . --release --no-default-features --features module,${{ matrix.lua_version }}
+          cargo build --release --no-default-features --features module,${{ matrix.lua_version }}
 
       - name: Rename for Lua
         if: endsWith(matrix.job.target, '-darwin')
         run: |
-          cp libminijinja_lua.dylib minijinja.so
+          cp target/release/libminijinja_lua.dylib minijinja.so
 
       - name: Rename for Lua
         if: endsWith(matrix.job.target, '-linux')
         run: |
-          cp libminijinja_lua.so minijinja.so
+          cp target/release/libminijinja_lua.so minijinja.so
 
       - name: Rename for Lua
         if: endsWith(matrix.job.target, '-msvc')
         run: |
-          cp libminijinja_lua.dll minijinja.dll
+          cp target/release/libminijinja_lua.dll minijinja.dll
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
