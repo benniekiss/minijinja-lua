@@ -2,9 +2,9 @@ name: Publish package
 
 on:
   workflow_dispatch:
-  # push:
-  #   tags:
-  #     - "*"
+  push:
+    tags:
+      - "*"
 
 jobs:
   luarocks-upload:

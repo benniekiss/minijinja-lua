@@ -8,9 +8,9 @@ on:
         required: true
         default: true
         type: boolean
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 jobs:
   # Release unpublished packages.
