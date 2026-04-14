@@ -56,24 +56,26 @@ jobs:
       - name: Rename for Lua
         if: endsWith(matrix.job.target, '-darwin')
         run: |
-          cp target/release/libminijinja_lua.dylib minijinja.so
+          cp target/release/libminijinja_lua.dylib minijinja-${{ matrix.job.target }}-${{ matrix.lua_version }}.so
 
       - name: Rename for Lua
         if: endsWith(matrix.job.target, '-linux')
         run: |
-          cp target/release/libminijinja_lua.so minijinja.so
+          cp target/release/libminijinja_lua.so minijinja-${{ matrix.job.target }}-${{ matrix.lua_version }}.so
 
       - name: Rename for Lua
         if: endsWith(matrix.job.target, '-msvc')
         run: |
-          copy target\release\minijinja.dll minijinja.dll
+          cp target/release/minijinja_lua.dll minijinja-${{ matrix.job.target }}-${{ matrix.lua_version }}.dll
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ matrix.job.target }}-${{ matrix.lua_version }}
-          path: "minijinja.so"
           if-no-files-found: "error"
+          name: ${{ matrix.job.target }}-${{ matrix.lua_version }}
+          path: |
+            minijinja-*.so
+            minijinja-*.dll
 
   upload:
     if: ${{ !inputs.skip_upload }}
@@ -86,10 +88,10 @@ jobs:
         uses: softprops/action-gh-release@v3
         if: github.ref_type == 'tag'
         with:
-          working_directory: dist
+          fail_on_unmatched_files: true
           files: |
-            Release.txt
-            checksums/*.txt
+            minijinja-*.so
+            minijinja-*.dll
 
   luarocks-upload:
     if: ${{ !inputs.skip_upload }}
