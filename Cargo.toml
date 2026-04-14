@@ -14,7 +14,7 @@ name = "minijinja_lua"
 crate-type = ["cdylib", "lib"]
 
 [features]
-default = ["lua55", "vendored"]
+default = ["lua54", "vendored"]
 lua55 = ["mlua/lua55"]
 lua54 = ["mlua/lua54"]
 lua53 = ["mlua/lua53"]

@@ -6,6 +6,9 @@ on:
     tags:
       - "*"
 
+env:
+  LUA_VERSION: 5.4
+
 jobs:
   luarocks-upload:
     runs-on: ubuntu-24.04
@@ -19,4 +22,4 @@ jobs:
       - name: Upload
         env:
           LUX_API_KEY: ${{ secrets.LUX_API_KEY }}
-        run: lx upload
+        run: lx --lua-version ${{ env.LUA_VERSION }} upload
