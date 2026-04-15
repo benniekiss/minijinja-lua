@@ -1,5 +1,9 @@
 # minijinja-lua
 
+![License](https://img.shields.io/github/license/benniekiss/minijinja-lua)
+![Version](https://img.shields.io/github/v/release/benniekiss/minijinja-lua)
+[![LuaRocks](https://img.shields.io/luarocks/v/benniekiss/minijinja-lua)](https://luarocks.org/modules/benniekiss/minijinja-lua)
+
 *A Lua module for [`minijinja`](https://github.com/mitsuhiko/minijinja) via
 [`mlua`](https://github.com/mlua-rs/mlua) bindings*
 
