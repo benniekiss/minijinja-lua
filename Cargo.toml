@@ -11,7 +11,7 @@ description = "lua bindings for minijinja"
 
 [lib]
 name = "minijinja_lua"
-crate-type = ["cdylib", "lib"]
+crate-type = ["cdylib"]
 
 [features]
 default = ["lua54", "vendored"]
@@ -27,7 +27,6 @@ module = ["mlua/module"]
 minijinja = { version = "2.19.0", features = ["fuel", "indexmap", "json", "custom_syntax", "loop_controls", "percent-encoding", "preserve_order", "speedups", "unicode", "stacker"] }
 minijinja-contrib = { version = "2.19.0", features = ["datetime", "html_entities", "pycompat", "rand", "unicode_wordwrap", "wordcount"] }
 mlua = { version = "0.11", features = [ "serde" ] }
-serde = { version = "1.0.228" }
 
 [profile.release]
 strip = true
