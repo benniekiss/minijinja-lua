@@ -37,7 +37,7 @@ local ctx = {
 }
 
 env:render_template("my_temp", ctx)
--- output: "TEST: FOO"
+-- output: "Test: FOO"
 ```
 
 The API is documented in the `minijinja.lua` file, which should work with LuaLS
