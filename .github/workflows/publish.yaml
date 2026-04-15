@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: "error"
-          name: ${{ matrix.job.target }}-${{ matrix.lua_version }}
+          name: minijinja-lua-${{ matrix.job.target }}-${{ matrix.lua_version }}
           path: |
             minijinja.so
             minijinja.dll
@@ -91,8 +91,9 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           fail_on_unmatched_files: true
+          overwrite: false
           files: |
-            minijinja-*.zip
+            minijinja-lua-*.zip
 
   luarocks-upload:
     if: ${{ !inputs.skip_upload }}
