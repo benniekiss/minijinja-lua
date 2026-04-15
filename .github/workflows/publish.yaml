@@ -11,6 +11,10 @@ on:
   release:
     types: [published]
 
+env:
+  LUA_VERSION: 5.4
+  LUX_VERSION: 0.28.0
+
 jobs:
   build:
     name: ${{ matrix.job.target }}-${{ matrix.lua_version }}
@@ -42,38 +46,20 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
+      - name: Setup Lux
+        uses: lumen-oss/gh-actions-lux@d12a6bdf3a380de5b9d142272e6fd95d28b44b8d # v1
         with:
-          target: ${{ matrix.job.target }}
+          version: ${{ env.LUX_VERSION }}
 
-      - name: Build
-        run: |
-          cargo build --release --no-default-features --features module,${{ matrix.lua_version }}
-
-      - name: Rename for Lua
-        if: endsWith(matrix.job.target, '-gnu')
-        run: |
-          cp target/release/libminijinja_lua.so minijinja.so
-
-      - name: Rename for Lua
-        if: endsWith(matrix.job.target, '-darwin')
-        run: |
-          cp target/release/libminijinja_lua.dylib minijinja.so
-
-      - name: Rename for Lua
-        if: endsWith(matrix.job.target, '-msvc')
-        run: |
-          cp target/release/minijinja_lua.dll minijinja.dll
+      - name: Build rock
+        run: lx --lua-version ${{ env.LUA_VERSION }} pack
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: "error"
-          name: minijinja-lua-${{ matrix.job.target }}-${{ matrix.lua_version }}
           path: |
-            minijinja.so
-            minijinja.dll
+            *.rock
 
   upload:
     if: ${{ !inputs.skip_upload }}
@@ -83,7 +69,6 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
-          skip-decompress: true
           merge-multiple: true
 
       - name: Upload release
@@ -93,16 +78,12 @@ jobs:
           fail_on_unmatched_files: true
           overwrite: false
           files: |
-            minijinja-lua-*.zip
+            *.rock
 
   luarocks-upload:
     if: ${{ !inputs.skip_upload }}
     needs: build
     runs-on: ubuntu-24.04
-
-    env:
-      LUA_VERSION: 5.4
-      LUX_VERSION: 0.28.0
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
