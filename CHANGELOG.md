@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7](https://github.com/benniekiss/minijinja-lua/compare/v0.1.6...v0.1.7) - 2026-04-15
+
+### Other
+
+- *(deps)* update lock files
+- ignore generated .rock artifacts
+- build and publish as a rock
+- *(deps)* remove serde dep, change build target
+- *(ci)* fix paths for real
+
 ## [0.1.6](https://github.com/benniekiss/minijinja-lua/compare/v0.1.5...v0.1.6) - 2026-04-15
 
 ### Fixed
