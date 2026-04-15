@@ -84,13 +84,13 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           skip-decompress: true
+          merge-multiple: true
 
       - name: Upload release
         uses: softprops/action-gh-release@v3
         if: github.ref_type == 'tag'
         with:
           fail_on_unmatched_files: true
-          merge-multiple: true
           files: |
             minijinja-*.zip
 
