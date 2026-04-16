@@ -23,7 +23,7 @@
 --- iteration: empty array
 --- attributes: undefined
 --- test: falsey
----| "chainable" 
+---| "chainable"
 --- printing: fails
 --- iteration: fails
 --- attributes: fails
