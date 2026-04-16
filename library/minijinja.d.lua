@@ -13,7 +13,7 @@ local minijinja = {}
 
 --- Determines how undefined values are handled.
 ---
---- Can be provided to [`Environment.undefined_behavior`](lua://Environment.undefined_behavior).
+--- Can be provided to [`Environment.undefined_behavior`](lua://minijinja.Environment.undefined_behavior).
 ---
 ---@alias minijinja.UndefinedBehavior
 --- printing: empty string
@@ -46,31 +46,31 @@ local minijinja = {}
 
 --- A minijinja callback.
 ---
---- It takes a [`State`](lua://State) as the first paramter followed by any number of args.
+--- It takes a [`State`](lua://minijinja.State) as the first paramter followed by any number of args.
 ---
 ---@alias minijinja.Callback fun(state: State, ...): any
 
 --- A stateless minijinja callback.
 ---
---- Similar to a [`Filter`](lua://Filter), but it is not passed a [`State`](lua://State).
+--- Similar to a [`Callback`](lua://minijinja.Callback), but it is not passed a [`State`](lua://minijinja.State).
 ---
 ---@alias minijinja.CallbackStateless fun(...): any
 
 --- A minijinja global variable.
 ---
---- This type can be provided to [`Environment:add_global`](lua://Environment.add_global)
+--- This type can be provided to [`Environment:add_global()`](lua://minijinja.Environment.add_global)
 ---
 ---@alias minijinja.Global any|minijinja.Callback|minijinja.CallbackStateless
 
 --- A minijinja filter function.
 ---
---- This type of function can be provided to [`Environment:add_filter`](lua://Environment.add_filter)
+--- This type of function can be provided to [`Environment:add_filter()`](lua://minijinja.Environment.add_filter)
 ---
 ---@alias minijinja.Filter minijinja.Callback|minijinja.CallbackStateless
 
 --- A minijinja test function.
 ---
---- This type of function can be provided to [`Environment:add_test`](lua://Environment.add_test)
+--- This type of function can be provided to [`Environment:add_test()`](lua://minijinja.Environment.add_test)
 ---
 ---@alias minijinja.Test minijinja.Callback|minijinja.CallbackStateless
 
@@ -78,7 +78,7 @@ local minijinja = {}
 ---
 --- It takes the name of a template and returns the source or `nil` if no template could be found.
 ---
---- This type of function can be provided to [`Environment:set_loader`](lua://Environment.set_loader) to load templates from a filesystem.
+--- This type of function can be provided to [`Environment:set_loader()`](lua://minijinja.Environment.set_loader) to load templates from a filesystem.
 ---
 ---@alias minijinja.LoaderCallback fun(name: string): string|nil
 
@@ -86,31 +86,31 @@ local minijinja = {}
 ---
 --- It takes the name of a template and the parent path and returns a new derived path.
 ---
---- This type of function can be provided to [`Environment:set_path_join_callback`](lua://Environment.set_path_join_callback) to implement relative path resolution between templates.
+--- This type of function can be provided to [`Environment:set_path_join_callback()`](lua://minijinja.Environment.set_path_join_callback) to implement relative path resolution between templates.
 ---
 ---@alias minijinja.PathJoinCallback fun(name: string, parent: string): string
 
 --- A callback invoked for unknown methods on objects.
 ---
---- It takes a [`State`](lua://State), the object which the method was called on, the name of the method, and any arguments passed and returns any value.
+--- It takes a [`State`](lua://minijinja.State), the object which the method was called on, the name of the method, and any arguments passed and returns any value.
 ---
---- This type of function can be provided to [`Environment:set_unknown_method_callback`](lua://Environment.set_unknown_method_callback) to implement compatibility with python methods.
+--- This type of function can be provided to [`Environment:set_unknown_method_callback()`](lua://minijinja.Environment.set_unknown_method_callback) to implement compatibility with python methods.
 ---
 ---@alias minijinja.UnknownMethodCallback fun(state: State, value: any, method: string, args: any[]): any
 
 --- A callback to select the default auto escaping.
 ---
---- It takes the name of a template and returns an [`AutoEscape`](lua://AutoEscape) variant.
+--- It takes the name of a template and returns an [`AutoEscape`](lua://minijinja.AutoEscape) variant.
 ---
---- This type of function can be provided to [`Environment:set_auto_escape_callback`](lua://Environment.set_auto_escape_callback).
+--- This type of function can be provided to [`Environment:set_auto_escape_callback()`](lua://minijinja.Environment.set_auto_escape_callback).
 ---
 ---@alias minijinja.AutoEscapeCallback fun(name: string): minijinja.AutoEscape
 
 --- A callback to control how values are formatted.
 ---
---- It takes a [`State`](lua://State) and a value to be formatted, and it returns the formatted value as a string.
+--- It takes a [`State`](lua://minijinja.State) and a value to be formatted, and it returns the formatted value as a string.
 ---
---- This type of function can be provided to [`Environment:set_formatter`](lua://Environment.set_formatter).
+--- This type of function can be provided to [`Environment:set_formatter()`](lua://minijinja.Environment.set_formatter).
 ---
 ---@alias minijinja.FormatterCallback fun(state: State, value: any): string
 
@@ -141,7 +141,7 @@ local minijinja = {}
 ---@field debug boolean Enable debug behavior.
 ---@field fuel number|nil Sets the fuel of the engine. If `nil`, fuel usage is disabled.
 ---@field recursion_limit number Reconfigures the runtime recursion limit. Default is 500.
----@field undefined_behavior minijinja.UndefinedBehavior Changes the undefined behavior. Default is [`lenient`](lua://UndefinedBehavior.lenient).
+---@field undefined_behavior minijinja.UndefinedBehavior Changes the undefined behavior. Default is [`lenient`](lua://minijinja.UndefinedBehavior.lenient).
 minijinja.Environment = {}
 
 --- Create a new environment.
@@ -237,7 +237,7 @@ function minijinja.Environment:eval(source, ctx) end
 ---
 ---@param name string The name of the filter.
 ---@param filter minijinja.Filter The filter.
----@param pass_state? boolean Whether to pass a [`State`](lua://State) as the first argument.
+---@param pass_state? boolean Whether to pass a [`State`](lua://minijinja.State) as the first argument.
 function minijinja.Environment:add_filter(name, filter, pass_state) end
 
 --- Remove a filter.
@@ -249,7 +249,7 @@ function minijinja.Environment:remove_filter(name) end
 ---
 ---@param name string The name of the test.
 ---@param test minijinja.Test The test.
----@param pass_state? boolean Whether to pass a [`State`](lua://State) as the first argument.
+---@param pass_state? boolean Whether to pass a [`State`](lua://minijinja.State) as the first argument.
 function minijinja.Environment:add_test(name, test, pass_state) end
 
 --- Remove a test.
@@ -261,7 +261,7 @@ function minijinja.Environment:remove_test(name) end
 ---
 ---@param name string The name of the variable.
 ---@param global minijinja.Global The variable.
----@param pass_state? boolean Whether to pass a [`State`](lua://State) as the first argument to function variables.
+---@param pass_state? boolean Whether to pass a [`State`](lua://minijinja.State) as the first argument to function variables.
 function minijinja.Environment:add_global(name, global, pass_state) end
 
 --- Remove a global variable.
@@ -380,9 +380,9 @@ function minijinja.State:get_or_set_temp(name, func) end
 --- Get the type of `value`
 ---
 --- This function returns the strings
---- - `'environment'` for [`Environment`](lua://Environment)
---- - `'state'` for [`State`](lua://State)
---- - `'none'` for [`None`](lua://None)
+--- - `'environment'` for [`Environment`](lua://minijinja.Environment)
+--- - `'state'` for [`State`](lua://minijinja.State)
+--- - `'none'` for [`None`](lua://minijinja.None)
 --- - or the values returned by the builtin `type()` function.
 ---
 ---@param value any
@@ -392,7 +392,7 @@ function minijinja.type(value) end
 
 --- Get a callback to load templates from the provided directory paths.
 ---
---- The function returned by this one can be passed to [`Environment:set_loader`](lua://Environment.set_loader) to load templates from the filesystem.
+--- The function returned by this one can be passed to [`Environment:set_loader()`](lua://minijinja.Environment.set_loader) to load templates from the filesystem.
 ---
 ---@param paths string|string[]
 ---
