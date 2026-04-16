@@ -17,6 +17,7 @@ dev = "git+https://github.com/benniekiss/$(PACKAGE)"
 type = "rust-mlua"
 default_features = false
 features = ["module"]
+copy_directories = [ "library" ]
 
 [build.modules]
 "minijinja" = "minijinja_lua"
