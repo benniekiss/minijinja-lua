@@ -40,8 +40,15 @@ env:render_template("my_temp", ctx)
 -- output: "Test: FOO"
 ```
 
-The API is documented in the `minijinja.lua` file, which should work with LuaLS
+The API is documented in the `library/minijinja.lua` file, which should work with LuaLS
 or EmmyluaLS.
+
+For more information, review the [`minijinja`](https://docs.rs/minijinja/latest/minijinja/index.html) documentation:
+
+- [syntax](https://docs.rs/minijinja/latest/minijinja/syntax/index.html)
+- [filters](https://docs.rs/minijinja/latest/minijinja/filters/index.html)
+- [tests](https://docs.rs/minijinja/latest/minijinja/tests/index.html)
+- [functions](https://docs.rs/minijinja/latest/minijinja/functions/index.html)
 
 ## Development
 
