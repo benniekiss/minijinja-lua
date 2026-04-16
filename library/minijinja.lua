@@ -2,178 +2,271 @@
 
 ---@meta
 
---- A filter callback.
+--- Minijinja types
 ---
---- It takes a `State` as the first paramter followed by any number of args.
----
---- Returns any value.
----
----@alias Filter fun(state: State, ...): any
+---@alias Types
+---| "environment"
+---| "state"
+---| "none"
 
---- A test callback
+--- Determines how undefined values are handled.
 ---
---- It takes a `State` as the first parameter followed by any number of args.
----
---- Must return a boolean
----
----@alias Test fun(state, ...): boolean
-
---- Determines how undefined variables are handled.
+--- Can be provided to [`Environment.undefined_behavior`](lua://Environment.undefined_behavior).
 ---
 ---@alias UndefinedBehavior
----| "chainable"
+--- printing: empty string
+--- iteration: empty array
+--- attributes: fails
+--- test: falsey
 ---| "lenient"
+--- printing: empty string
+--- iteration: empty array
+--- attributes: undefined
+--- test: falsey
+---| "chainable" 
+--- printing: fails
+--- iteration: fails
+--- attributes: fails
+--- test: falsey
 ---| "semi-strict"
+--- printing: fails
+--- iteration: fails
+--- attributes: fails
+--- test: fails
 ---| "strict"
 
---- Determines how autoescaping is applied
+--- Determines how autoescaping is applied.
 ---
 ---@alias AutoEscape
 ---| "html"
 ---| "json"
 ---| "none"
 
---- Configure the syntax for the environment
+--- A minijinja callback.
+---
+--- It takes a [`State`](lua://State) as the first paramter followed by any number of args.
+---
+---@alias Callback fun(state: State, ...): any
+
+--- A stateless minijinja callback.
+---
+--- Similar to a [`Filter`](lua://Filter), but it is not passed a [`State`](lua://State).
+---
+---@alias CallbackStateless fun(...): any
+
+--- A minijinja global variable.
+---
+--- This type can be provided to [`Environment:add_global`](lua://Environment.add_global)
+---
+---@alias Global any|Callback|CallbackStateless
+
+--- A minijinja filter function.
+---
+--- This type of function can be provided to [`Environment:add_filter`](lua://Environment.add_filter)
+---
+---@alias Filter Callback|CallbackStateless
+
+--- A minijinja test function.
+---
+--- This type of function can be provided to [`Environment:add_test`](lua://Environment.add_test)
+---
+---@alias Test Callback|CallbackStateless
+
+--- A template loader callback.
+---
+--- It takes the name of a template and returns the source or `nil` if no template could be found.
+---
+--- This type of function can be provided to [`Environment:set_loader`](lua://Environment.set_loader) to load templates from a filesystem.
+---
+---@alias LoaderCallback fun(name: string): string|nil
+
+--- A path join callback
+---
+--- It takes the name of a template and the parent path and returns a new derived path.
+---
+--- This type of function can be provided to [`Environment:set_path_join_callback`](lua://Environment.set_path_join_callback) to implement relative path resolution between templates.
+---
+---@alias PathJoinCallback fun(name: string, parent: string): string
+
+--- A callback invoked for unknown methods on objects.
+---
+--- It takes a [`State`](lua://State), the object which the method was called on, the name of the method, and any arguments passed and returns any value.
+---
+--- This type of function can be provided to [`Environment:set_unknown_method_callback`](lua://Environment.set_unknown_method_callback) to implement compatibility with python methods.
+---
+---@alias UnknownMethodCallback fun(state: State, value: any, method: string, args: any[]): any
+
+--- A callback to select the default auto escaping.
+---
+--- It takes the name of a template and returns an [`AutoEscape`](lua://AutoEscape) variant.
+---
+--- This type of function can be provided to [`Environment:set_auto_escape_callback`](lua://Environment.set_auto_escape_callback).
+---
+---@alias AutoEscapeCallback fun(name: string): AutoEscape
+
+--- A callback to control how values are formatted.
+---
+--- It takes a [`State`](lua://State) and a value to be formatted, and it returns the formatted value as a string.
+---
+--- This type of function can be provided to [`Environment:set_formatter`](lua://Environment.set_formatter).
+---
+---@alias FormatterCallback fun(state: State, value: any): string
+
+--- This value can be used in place of `nil` to indicate intentionally null values.
+---
+--- It maps to the `minijinja` `None` value.
+---
+---@alias None userdata
+
+--- Configure the syntax for the environment.
 ---
 ---@class (exact) SyntaxConfig
 ---
----@field block_delimiters? [string, string]
----@field variable_delimiters? [string, string]
----@field comment_delimiters? [string, string]
+---@field block_delimiters? [string, string] Start and end delimiters
+---@field variable_delimiters? [string, string] Start and end delimiters
+---@field comment_delimiters? [string, string] Start and end delimiters
 ---@field line_statement_prefix? string
 ---@field line_comment_prefix? string
 
---- A minijinja environment
+--- A minijinja environment.
 ---
 ---@class (exact) Environment: userdata
 ---
----@field keep_trailing_newline boolean
----@field trim_blocks boolean
----@field lstrip_blocks boolean
----@field debug boolean
----@field fuel number
----@field recursion_limit number
----@field undefined_behavior UndefinedBehavior
+---@field reload_before_render boolean Reload templates before each render.
+---@field keep_trailing_newline boolean Preserve trailing newlines at the end of templates.
+---@field trim_blocks boolean Remove the first newline after a block.
+---@field lstrip_blocks boolean Remove leading spaces and tabs from the start of a line to a block.
+---@field debug boolean Enable debug behavior.
+---@field fuel number|nil Sets the fuel of the engine. If `nil`, fuel usage is disabled.
+---@field recursion_limit number Reconfigures the runtime recursion limit. Default is 500.
+---@field undefined_behavior UndefinedBehavior Changes the undefined behavior. Default is [`lenient`](lua://UndefinedBehavior.lenient).
 Environment = {}
 
---- Create a new environment
+--- Create a new environment.
 ---
 ---@return Environment
 function Environment:new() end
 
---- Add a template
+--- Create an empty environment.
 ---
----@param name string
----@param source string
+--- This environment has no default filters, tests, or globals.
+---
+---@return Environment
+function Environment:empty() end
+
+--- Add a template.
+---
+---@param name string The name of the template.
+---@param source string The template source contents.
 function Environment:add_template(name, source) end
 
---- Remove a template
+--- Remove a template.
 ---
----@param name string
+---@param name string The name of the template.
 function Environment:remove_template(name) end
 
---- Remove all templates
+--- Remove all templates.
 function Environment:clear_templates() end
 
---- Return a table of all undeclared template variables
+--- Return a table of all undeclared template variables.
 ---
----@param nested boolean
+---@param nested boolean If `true`, nested trivial attribute lookups are also returned.
 ---
 ---@return table
 function Environment:undeclared_variables(nested) end
 
---- Register a template loader as source of templates
+--- Sets a callback to load template sources.
 ---
----@param loader fun(name: string): string|nil
-function Environment:set_loader(loader) end
+---@param callback LoaderCallback
+function Environment:set_loader(callback) end
 
---- Sets a callback to join template paths
+--- Sets a callback to join template paths.
 ---
----@param callback fun(name: string, parent: string): string
+---@param callback PathJoinCallback
 function Environment:set_path_join_callback(callback) end
 
 --- Sets a callback invoked for unknown methods on objects.
 ---
----@param callback fun(state: State, value: any, method: string)
+---@param callback UnknownMethodCallback
 function Environment:set_unknown_method_callback(callback) end
 
---- Sets a new function to select the default auto escaping.
+--- Sets a callback to select the default auto escaping behavior.
 ---
----@param callback fun(name: string): AutoEscape
+---@param callback AutoEscapeCallback
 function Environment:set_auto_escape_callback(callback) end
 
---- Sets a different formatter function.
+--- Sets a callback to control how values are formatted.
 ---
----@param formatter fun(state: State, value: any)
-function Environment:set_formatter(formatter) end
+---@param callback FormatterCallback
+function Environment:set_formatter(callback) end
 
 --- Sets the syntax for the environment.
 ---
 ---@param syntax SyntaxConfig
 function Environment:set_syntax(syntax) end
 
---- Render a template
+--- Render a template.
 ---
----@param name string
----@param ctx table
+---@param name string The name of the template to render.
+---@param ctx? table The template context.
 ---
----@return string
+---@return string # The rendered template.
 function Environment:render_template(name, ctx) end
 
---- Render a string
+--- Render a string directly.
 ---
----@param source string
----@param ctx table
----@param name? string
+---@param source string The template source.
+---@param ctx? table The template context.
+---@param name? string The name of the template. Defaults to `<string>`.
 ---
----@return string
+---@return string # The rendered template.
 function Environment:render_str(source, ctx, name) end
 
---- Evaluate an expression
+--- Evaluate an expression.
 ---
----@param source string
----@param ctx table
+---@param source string The expression source
+---@param ctx? table The expression context.
 ---
----@return any
+---@return any # The result of the expression
 function Environment:eval(source, ctx) end
 
---- Add a filter
+--- Add a filter.
 ---
----@param name string
----@param filter Filter
----@param pass_state? boolean pass a State as the first arg
+---@param name string The name of the filter.
+---@param filter Filter The filter.
+---@param pass_state? boolean Whether to pass a [`State`](lua://State) as the first argument.
 function Environment:add_filter(name, filter, pass_state) end
 
---- Remove a filter
+--- Remove a filter.
 ---
----@param name string
+---@param name string The name of the filter.
 function Environment:remove_filter(name) end
 
---- Add a test
+--- Add a test.
 ---
----@param name string
----@param test Test
----@param pass_state? boolean pass a State as the first arg
+---@param name string The name of the test.
+---@param test Test The test.
+---@param pass_state? boolean Whether to pass a [`State`](lua://State) as the first argument.
 function Environment:add_test(name, test, pass_state) end
 
---- Remove a test
+--- Remove a test.
 ---
----@param name string
+---@param name string The name of the test.
 function Environment:remove_test(name) end
 
---- Add a global value
+--- Add a global variable.
 ---
----@param name string
----@param global any
----@param pass_state? boolean pass a State as the first arg
+---@param name string The name of the variable.
+---@param global Global The variable.
+---@param pass_state? boolean Whether to pass a [`State`](lua://State) as the first argument to function variables.
 function Environment:add_global(name, global, pass_state) end
 
---- Remove a global value
+--- Remove a global variable.
 ---
----@param name string
+---@param name string The name of the variable.
 function Environment:remove_global(name) end
 
---- Get a list of all global variables
+--- Get a list of all global variables.
 ---
 ---@return any[]
 function Environment:globals() end
@@ -185,98 +278,120 @@ function Environment:globals() end
 ---@class (exact) State: userdata
 State = {}
 
---- Returns the name of the current template.
+--- Get the name of the current template.
 ---
----@return string
+---@return string # The template name.
 function State:name() end
 
---- Returns the current value of the auto escape flag.
+--- Get the current value of the auto escape flag.
 ---
----@return AutoEscape
+---@return AutoEscape # The current auto escape flag.
 function State:auto_escape() end
 
---- Returns the current undefined behavior.
+--- Get the current undefined behavior.
 ---
----@return UndefinedBehavior
+---@return UndefinedBehavior # The current undefined behavior.
 function State:undefined_behavior() end
 
---- Returns the name of the innermost block.
+--- Get the name of the innermost block.
 ---
----@return string
+---@return string # The name of the innermost block.
 function State:current_block() end
 
---- Looks up a variable by name in the context.
+--- Look up a variable in the render context by name.
 ---
----@param name string
+---@param name string The name of the variable.
 ---
----@return any
+---@return any # The variable associated with `name`.
 function State:lookup(name) end
 
---- Looks up a global macro and calls it.
+--- Call a macro.
 ---
----@param name string
----@param ... any
+---@param name string The name of the macro.
+---@param ... any Arguments to pass to the macro.
 ---
----@return string
+---@return string # The macro output.
 function State:call_macro(name, ...) end
 
---- Returns a list of the names of all exports (top-level variables).
+--- Get a list of names for all exports (top-level variables).
 ---
 ---@return string[]
 function State:exports() end
 
---- Returns a list of all known variables.
+--- Get a list of all known variables.
 ---
 ---@return string[]
 function State:known_variables() end
 
 --- Invokes a filter with some arguments.
 ---
----@param filter string
----@param ... any
+---@param filter string The name of the filter.
+---@param ... any Arguments to pass to the filter.
 ---
----@return any
+---@return any # The output of the filter.
 function State:apply_filter(filter, ...) end
 
 --- Invokes a test function on a value.
 ---
----@param test string
----@param ... any
+---@param test string The name of the test.
+---@param ... any Arguments to pass to the test.
 ---
----@return boolean
+---@return boolean # The output of the test.
 function State:perform_test(test, ...) end
 
---- Formats a value to a string using the formatter on the environment.
+--- Format a value to a string using the formatter configured for the environment.
+---
+---@param value any The value to format.
+---
+---@return string # The formatted value.
+function State:format(value) end
+
+--- Get the consumed and remaining fuel levels.
+---
+---@return [number, number] # The [consumed, remaining] fuel levels.
+function State:fuel_levels() end
+
+--- Look up a temp variable.
+---
+---@param name string The name of the variable.
+---
+---@return any # The variable associated with `name`.
+function State:get_temp(name) end
+
+--- Set a temp variable and return the old value.
+---
+---@param name string The name of the variable.
+---@param temp any The temp variable.
+---
+---@return any # The old temp variable value.
+function State:set_temp(name, temp) end
+
+--- Get a temp variable or add the variable returned by `func`.
+---
+---@param name string The name of the variable.
+---@param func fun(): any The function to call if the temp is not set.
+---
+---@return any # The variable associated with `name`, or the variable returnd by `func`.
+function State:get_or_set_temp(name, func) end
+
+--- Get the type of `value`
+---
+--- This function returns the strings
+--- - `'environment'` for [`Environment`](lua://Environment)
+--- - `'state'` for [`State`](lua://State)
+--- - `'none'` for [`None`](lua://None)
+--- - or the values returned by the builtin `type()` function.
 ---
 ---@param value any
 ---
----@return string
-function State:format(value) end
+---@return Types|string
+function type(value) end
 
---- Returns the fuel levels.
+--- Get a callback to load templates from the provided directory paths.
 ---
----@return [number, number]
-function State:fuel_levels() end
-
---- Looks up a temp and returns it.
+--- The function returned by this one can be passed to [`Environment:set_loader`](lua://Environment.set_loader) to load templates from the filesystem.
 ---
----@param name string
+---@param paths string|string[]
 ---
----@return any
-function State:get_temp(name) end
-
---- Inserts a temp and returns the old temp.
----
----@param name string
----@param temp any
----
----@return any
-function State:set_temp(name, temp) end
-
---- Get a temp or call func to add the value
----
----@param name string
----@param func fun(): any
----
----@return any
-function State:get_or_set_temp(name, func) end
+---@return LoaderCallback
+function path_loader(paths) end
