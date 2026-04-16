@@ -5,4 +5,10 @@ return {
         shuffle = false,
         ["keep-going"] = true,
     },
+
+    examples = {
+        ROOT = { "examples/spec" },
+        lua = "pandoc lua",
+        lpath = "./examples/?.lua",
+    }
 }
