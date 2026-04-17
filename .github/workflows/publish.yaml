@@ -85,7 +85,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           fail_on_unmatched_files: true
-          overwrite: false
+          overwrite_files: false
           files: |
             *.rock
 
