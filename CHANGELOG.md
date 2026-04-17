@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.8](https://github.com/benniekiss/minijinja-lua/compare/v0.1.7...v0.1.8) - 2026-04-17
+
+### Fixed
+
+- *(ci)* revert not saving prek cache
+- *(ci)* try not caching prek env
+- *(ci)* use `if` condition to prevent running on release-plz pr
+- *(ci)* only setup lux
+- *(ci)* try prek without setup actions
+- rename and fixup type definitions
+
+### Other
+
+- *(ci)* use repo level variables for lua and lux versions
+- add pandoc filter
+- *(deps)* pin dependencies ([#9](https://github.com/benniekiss/minijinja-lua/pull/9))
+- copy type definitions into the rock build
+- use correct branch name
+- don't run workflows on release PR update
+- fix type definition link namespaces
+- formatting
+- add links to upstream documentation
+- fill out type documentation
+- update lua version
+- initiate msvc on windows
+
 ## [0.1.7](https://github.com/benniekiss/minijinja-lua/compare/v0.1.6...v0.1.7) - 2026-04-15
 
 ### Other
