@@ -52,15 +52,13 @@ jobs:
       # directly, as done in:
       #
       # See: https://github.com/bitcoin-core/secp256k1/pull/1846
-      - name: Build rock (windows)
+      - name: Setup MSVC
         if: ${{ endsWith(matrix.job.target, '-msvc') }}
         shell: cmd
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          lx --lua-version ${{ vars.LUA_VERSION }} pack
 
-      - name: Build rock (unix)
-        if: ${{ !endsWith(matrix.job.target, '-msvc') }}
+      - name: Build rock
         run: |
           lx --lua-version ${{ vars.LUA_VERSION }} pack
 
@@ -68,6 +66,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           if-no-files-found: "error"
+          name: minijinja-lua-${{ matrix.job.target }}-${{ matrix.lua_version }}
           path: |
             *.rock
 
@@ -82,6 +81,7 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           merge-multiple: true
+          skip-decompress: true
 
       - name: Upload release
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
@@ -90,7 +90,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: false
           files: |
-            *.rock
+            *.zip
 
   luarocks-upload:
     if: ${{ !inputs.skip_upload }}
