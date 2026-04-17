@@ -3,6 +3,10 @@ name: Publish
 on:
   workflow_dispatch:
     inputs:
+      tag:
+        description: 'Tag to build and upload'
+        required: false
+        type: string
       skip_upload:
         description: 'Skip upload'
         required: true
@@ -10,6 +14,9 @@ on:
         type: boolean
   release:
     types: [published]
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   build:
@@ -41,6 +48,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ env.RELEASE_TAG }}
 
       - name: Setup Lux
         uses: lumen-oss/gh-actions-lux@d12a6bdf3a380de5b9d142272e6fd95d28b44b8d # v1
@@ -87,8 +96,8 @@ jobs:
 
       - name: Upload release
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
-        if: github.ref_type == 'tag'
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
           fail_on_unmatched_files: true
           overwrite_files: false
           files: |
@@ -101,6 +110,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ env.RELEASE_TAG }}
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7
@@ -114,7 +125,6 @@ jobs:
           version: ${{ vars.LUX_VERSION }}
 
       - name: Upload rock
-        if: github.ref_type == 'tag'
         env:
           LUX_API_KEY: ${{ secrets.LUX_API_KEY }}
         run: lx --lua-version ${{ vars.LUA_VERSION }} upload
