@@ -38,6 +38,12 @@
             "matchManagers": ["custom.regex"],
             "matchPackageNames": ["rust"],
             "rangeStrategy": "pin"
+        },
+        {
+            "matchManagers": [
+                "pip_requirements"
+            ],
+            "rangeStrategy": "pin"
         }
     ]
 }
