@@ -52,7 +52,7 @@ lua_ls_project_directories = [
     "library/",
     "examples/",
 ]
-lua_ls_backend = "luals"
+lua_ls_backend = "emmylua"
 
 lua_ls_apidoc_format = "md"
 lua_ls_apidoc_roots = {

@@ -77,3 +77,4 @@ target
 
 # Sphinx docs
 docs/api
+_site
