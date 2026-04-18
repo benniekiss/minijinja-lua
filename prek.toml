@@ -20,7 +20,7 @@ args = [ "--maxkb=1000" ]
 [[repos]]
 repo = "local"
 
-## Disabled because it currently returns a non-zero exit code even on success
+## Disabled because there are currently no lua files to check
 # [[repos.hooks]]
 # id = "lx-check"
 # name = "lx check"
