@@ -9,7 +9,8 @@
     "prConcurrentLimit": 0,
     "enabledManagers": [
         "github-actions",
-        "cargo"
+        "cargo",
+        "pip_requirements"
     ],
     "lockFileMaintenance": {
         "enabled": true,
