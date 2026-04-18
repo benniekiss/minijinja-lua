@@ -35,7 +35,7 @@ jobs:
           uvx --with-requirements=docs/requirements.txt --from sphinx sphinx-build docs/ ${{ env.OUTDIR }}
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: ${{ env.OUTDIR }}
 
