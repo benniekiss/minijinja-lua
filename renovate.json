@@ -12,6 +12,9 @@
         "cargo",
         "pip_requirements"
     ],
+    "pip_requirements": {
+        "rangeStrategy": "pin"
+    },
     "lockFileMaintenance": {
         "enabled": true,
         "schedule": [
@@ -37,12 +40,6 @@
         {
             "matchManagers": ["custom.regex"],
             "matchPackageNames": ["rust"],
-            "rangeStrategy": "pin"
-        },
-        {
-            "matchManagers": [
-                "pip_requirements"
-            ],
             "rangeStrategy": "pin"
         }
     ]
