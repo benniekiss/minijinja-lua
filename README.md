@@ -40,10 +40,12 @@ env:render_template("my_temp", ctx)
 -- output: "Test: FOO"
 ```
 
-The API is documented in the [`library/minijinja.lua`](library/minijinja.d.lua) file, which should work with LuaLS
-or EmmyluaLS.
+The API is documented in the [`library/minijinja.lua`](library/minijinja.d.lua)
+file, which should work with LuaLS or EmmyluaLS.
 
-For more information, review the [`minijinja`](https://docs.rs/minijinja/latest/minijinja/index.html) documentation:
+For more information, review the
+[`minijinja`](https://docs.rs/minijinja/latest/minijinja/index.html)
+documentation:
 
 - [syntax](https://docs.rs/minijinja/latest/minijinja/syntax/index.html)
 - [filters](https://docs.rs/minijinja/latest/minijinja/filters/index.html)
@@ -115,6 +117,17 @@ To build the project as a lua module, run `lx build`, or `cargo build
 of `55`, `54`, `53`, `52`, or `51`.
 
 To build it as a library, run `cargo build`.
+
+### Docs
+
+Documentation is generated with
+[`sphinx`](https://www.sphinx-doc.org/en/master/) using the
+[`sphinx-lua-ls`](https://github.com/sphinx-contrib/lua-ls/) plugin.
+
+To generate the docs, [install
+uv](https://docs.astral.sh/uv/getting-started/installation/) and run `uvx
+--with-requirements=docs/requirements.txt sphinx-autobuild docs/ _site`. The
+site will be available at `http://127.0.0.1:8000`
 
 ### Submitting PRs
 
