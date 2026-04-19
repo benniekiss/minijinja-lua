@@ -177,6 +177,17 @@ function minijinja.Environment:set_path_join_callback(callback) end
 ---@param callback minijinja.UnknownMethodCallback
 function minijinja.Environment:set_unknown_method_callback(callback) end
 
+--- Enable python compatibility for object methods.
+---
+--- This sets [`Environment:set_unknown_method_callback()`](minijinja.Environment:set_unknown_method_callback)
+--- with a callback that enables some python object methods to increase compatibility
+--- with Jinja templates.
+---
+--- See: https://docs.rs/minijinja-contrib/latest/minijinja_contrib/pycompat/fn.unknown_method_callback.html
+---
+---@param enable? boolean
+function minijinja.Environment:set_pycompat(enable) end
+
 --- Sets a callback to select the default auto escaping behavior.
 ---
 ---@param callback minijinja.AutoEscapeCallback
