@@ -1,10 +1,44 @@
+-- SPDX-License-Identifier: MIT
+
 --[[
 a pandoc filter utilizing minijinja.
+
+minijinja can be configured through the `minijinja` metadata key. Render context
+can be set directly in the metadata, or the `minijinja.context` key can be set
+to the filepath of a json or yaml file containing the context.
+
+```yaml
+---
+minijinja:
+    context:
+        foo: "FOO"
+        bar:
+            - one
+            - two
+            - three
+    reload_before_render: true
+    keep_trailing_newline: false
+    trim_blocks: false
+    lstrip_blocks: false
+    debug: false
+    fuel: null
+    recursion_limit: 500
+    undefined_behavior: "lenient"
+    pycompat: true
+---
+```
+
+When provided as a filter, the document will be converted to markdown, rendered,
+then converted back to a `pandoc.Pandoc` object.
 ]]
 
 local minijinja = require("minijinja")
 
----@class (exact) JinjaSettings
+local filter = {}
+
+--- Settings to configure minijinja rendering
+---
+---@class (exact) minijinja_pandoc_filter.JinjaSettings
 ---
 ---@field reload_before_render? boolean
 ---@field keep_trailing_newline? boolean
@@ -14,6 +48,7 @@ local minijinja = require("minijinja")
 ---@field fuel? integer
 ---@field recursion_limit? integer
 ---@field undefined_behavior? minijinja.UndefinedBehavior
+---@field pycompat? boolean
 ---@field context? table
 local JinjaSettings = {
     reload_before_render = nil,
@@ -24,30 +59,13 @@ local JinjaSettings = {
     fuel = nil,
     recursion_limit = nil,
     undefined_behavior = nil,
+    pycompat = nil,
     context = nil,
 }
 
 local JSON_EXTS = pandoc.List({ ".json" })
 
 local YAML_EXTS = pandoc.List({ ".yaml", ".yml" })
-
---- Check if an extension is a JSON extension
----
----@param ext string
----
----@return boolean
-local function has_json_ext(ext)
-    return JSON_EXTS:includes(ext)
-end
-
---- Check if an extension is a YAML extension
----
----@param ext string
----
----@return boolean
-local function has_yaml_ext(ext)
-    return YAML_EXTS:includes(ext)
-end
 
 --- Read a file and return the contents, or nil if the file could not be read.
 ---
@@ -65,6 +83,24 @@ local function read_file(path)
     file:close()
 
     return content
+end
+
+--- Check if an extension is a JSON extension
+---
+---@param ext string
+---
+---@return boolean
+local function has_json_ext(ext)
+    return JSON_EXTS:includes(ext)
+end
+
+--- Check if an extension is a YAML extension
+---
+---@param ext string
+---
+---@return boolean
+local function has_yaml_ext(ext)
+    return YAML_EXTS:includes(ext)
 end
 
 --- Load a JSON file
@@ -109,10 +145,10 @@ end
 ---
 ---@param path string
 ---
----@return string|nil
+---@return table|nil
 local function load_context_from_file(path)
-    if not pandoc.path.exists(context) then
-        pandoc.log.error("file does not exist: " .. context)
+    if not pandoc.path.exists(path) then
+        pandoc.log.error("file does not exist: " .. path)
         return
     end
 
@@ -121,7 +157,7 @@ local function load_context_from_file(path)
     local is_yaml = has_yaml_ext(ext)
 
     if not (is_json or is_yaml) then
-        pandoc.log.error("only JSON and YAML files are supported: " .. context)
+        pandoc.log.error("only JSON and YAML files are supported: " .. path)
     end
 
     if is_json then
@@ -145,23 +181,40 @@ local function load_context(context)
         return
     end
 
+    local ctx
     if is_table then
-        JinjaSettings.context = context
+        ---@cast context table
+
+        ctx = context
     end
 
     if is_string then
-        JinjaSettings.context = load_context_from_file(context)
+        ---@cast context string
+
+        ctx = load_context_from_file(context)
     end
+
+    -- Pandoc metadata contains `MetaValue` types, which get cast as userdata
+    -- when provided to minijinja. To sanitize these, encode to json, then decode
+    -- to lua explicitly as non-pandoc types.
+    if ctx ~= nil then
+        ctx = pandoc.json.decode(pandoc.json.encode(ctx), false)
+    end
+
+    return ctx
 end
 
-local function Meta(meta)
+--- Parse a pandoc yaml metadata for minijinja settings
+---
+---@param meta pandoc.Meta
+function filter.Meta(meta)
     local mj = meta.minijinja
 
     if mj == nil then return end
 
     local context = mj.context
     if context ~= nil then
-        load_context(context)
+        JinjaSettings.context = load_context(context)
     end
 
     JinjaSettings.reload_before_render = mj.reload_before_render
@@ -172,10 +225,16 @@ local function Meta(meta)
     JinjaSettings.fuel = mj.fuel
     JinjaSettings.recursion_limit = mj.recursion_limit
     JinjaSettings.undefined_behavior = mj.undefined_behavior
+    JinjaSettings.pycompat = mj.pycompat
 end
 
-local function Pandoc(doc)
-    doc = doc:walk({ Meta = Meta })
+--- Render a document as a minijinja template
+---
+---@param doc pandoc.Pandoc
+---
+---@return pandoc.Pandoc
+function filter.Pandoc(doc)
+    doc = doc:walk({ Meta = filter.Meta })
 
     local env = minijinja.Environment:new()
 
@@ -188,13 +247,12 @@ local function Pandoc(doc)
     env.recursion_limit = JinjaSettings.recursion_limit
     env.undefined_behavior = JinjaSettings.undefined_behavior
 
+    env:set_pycompat(JinjaSettings.pycompat)
+
     local source = pandoc.write(doc, "markdown")
     local rendered = env:render_str(source, JinjaSettings.context, PANDOC_STATE.output_file)
 
     return pandoc.read(rendered, "markdown")
 end
 
-return {
-    Meta = Meta,
-    Pandoc = Pandoc,
-}
+return filter

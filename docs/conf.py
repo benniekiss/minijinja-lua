@@ -52,12 +52,13 @@ lua_ls_project_directories = [
     "library/",
     "examples/",
 ]
-lua_ls_backend = "luals"
+
+lua_ls_backend = "emmylua"
 
 lua_ls_apidoc_format = "md"
 lua_ls_apidoc_roots = {
     "minijinja": "api/minijinja",
-    "minijinja_filter": "api/examples/minijinja_filter",
+    "minijinja_pandoc_filter": "api/examples/minijinja_pandoc_filter",
 }
 lua_ls_apidoc_default_options = {
     "members": "",
