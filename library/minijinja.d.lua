@@ -15,11 +15,33 @@ local minijinja = {}
 ---
 --- Can be provided to [`Environment.undefined_behavior`](minijinja.Environment.undefined_behavior).
 ---
+--- Variants:
+---
+--- * lenient:
+---     - printing: empty string
+---     - iteration: empty array
+---     - attributes: fails
+---     - test: falsey
+--- * chainable:
+---     - printing: empty string
+---     - iteration: empty array
+---     - attributes: undefined
+---     - test: falsey
+--- * semi-strict:
+---     - printing: fails
+---     - iteration: fails
+---     - attributes: fails
+---     - test: falsey
+--- * strict:
+---     - printing: fails
+---     - iteration: fails
+---     - attributes: fails
+---     - test: fails
 ---@alias minijinja.UndefinedBehavior
----| "lenient" printing: empty string | iteration: empty array | attributes: fails | test: falsey
----| "chainable" printing: empty string | iteration: empty array | attributes: undefined | test: falsey
----| "semi-strict" printing: fails | iteration: fails | attributes: fails | test: falsey
----| "strict" printing: fails | iteration: fails | attributes: fails | test: fails
+---| "lenient"
+---| "chainable"
+---| "semi-strict"
+---| "strict"
 
 --- Determines how autoescaping is applied.
 ---
@@ -125,7 +147,7 @@ local minijinja = {}
 ---@field debug boolean Enable debug behavior.
 ---@field fuel number|nil Sets the fuel of the engine. If `nil`, fuel usage is disabled.
 ---@field recursion_limit number Reconfigures the runtime recursion limit. Default is 500.
----@field undefined_behavior minijinja.UndefinedBehavior Changes the undefined behavior. Default is [`lenient`](minijinja.UndefinedBehavior.lenient).
+---@field undefined_behavior minijinja.UndefinedBehavior Changes the undefined behavior. Default is [`lenient`](minijinja.UndefinedBehavior).
 minijinja.Environment = {}
 
 --- Create a new environment.
