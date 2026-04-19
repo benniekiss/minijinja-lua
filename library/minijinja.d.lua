@@ -100,9 +100,9 @@ local minijinja = {}
 
 --- This value can be used in place of `nil` to indicate intentionally null values.
 ---
---- It maps to the `minijinja` `None` value.
+--- It maps to the `minijinja::value::ValueKind::None` variant.
 ---
----@alias minijinja.None userdata
+---@alias minijinja.None lightuserdata
 
 --- Configure the syntax for the environment.
 ---
