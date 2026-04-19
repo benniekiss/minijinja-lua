@@ -16,26 +16,10 @@ local minijinja = {}
 --- Can be provided to [`Environment.undefined_behavior`](minijinja.Environment.undefined_behavior).
 ---
 ---@alias minijinja.UndefinedBehavior
---- printing: empty string
---- iteration: empty array
---- attributes: fails
---- test: falsey
----| "lenient"
---- printing: empty string
---- iteration: empty array
---- attributes: undefined
---- test: falsey
----| "chainable"
---- printing: fails
---- iteration: fails
---- attributes: fails
---- test: falsey
----| "semi-strict"
---- printing: fails
---- iteration: fails
---- attributes: fails
---- test: fails
----| "strict"
+---| "lenient" printing: empty string | iteration: empty array | attributes: fails | test: falsey
+---| "chainable" printing: empty string | iteration: empty array | attributes: undefined | test: falsey
+---| "semi-strict" printing: fails | iteration: fails | attributes: fails | test: falsey
+---| "strict" printing: fails | iteration: fails | attributes: fails | test: fails
 
 --- Determines how autoescaping is applied.
 ---
