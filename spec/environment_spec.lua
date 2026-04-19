@@ -508,6 +508,18 @@ describe("Environment tests", function()
 			assert.Equal("bar", rv)
 		end)
 
+		it("pycompat#callbacks", function()
+            local env = Environment:new()
+            local source = "{'x': 42}.get('x')"
+
+            env:set_pycompat()
+            assert.Equal(42, env:eval(source))
+
+            env:set_pycompat(false);
+            assert.Error(function() env:eval(source) end)
+
+		end)
+
 		it("autoescape#callbacks", function()
 			local env = Environment:new()
 			local rv
