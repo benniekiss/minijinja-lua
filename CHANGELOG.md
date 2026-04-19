@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.13](https://github.com/benniekiss/minijinja-lua/compare/v0.1.12...v0.1.13) - 2026-04-19
+
+### Added
+
+- add python compatibility support
+- add tests for pycompat
+
+### Fixed
+
+- *(docs)* use correct lua type for `minijinja.None`
+
+### Other
+
+- add stylua config and format
+- formatting
+- *(docs)* fixup annotation formatting
+
 ## [0.1.12](https://github.com/benniekiss/minijinja-lua/compare/v0.1.11...v0.1.12) - 2026-04-18
 
 ### Added
