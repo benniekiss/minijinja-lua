@@ -371,20 +371,25 @@ impl LuaUserData for LuaEnvironment {
             },
         );
 
-        methods.add_method("set_pycompat", |_, this: &LuaEnvironment, enable: Option<bool>| {
-            match enable {
-                Some(true) | None => {
-                    this.write_env()?
-                        .set_unknown_method_callback(minijinja_contrib::pycompat::unknown_method_callback);
-                },
-                Some(false) =>  {
-                    this.write_env()?
-                        .set_unknown_method_callback(|_, _, _, _,| Err(JinjaError::from(JinjaErrorKind::UnknownMethod)));
-                },
-            }
+        methods.add_method(
+            "set_pycompat",
+            |_, this: &LuaEnvironment, enable: Option<bool>| {
+                match enable {
+                    Some(true) | None => {
+                        this.write_env()?.set_unknown_method_callback(
+                            minijinja_contrib::pycompat::unknown_method_callback,
+                        );
+                    },
+                    Some(false) => {
+                        this.write_env()?.set_unknown_method_callback(|_, _, _, _| {
+                            Err(JinjaError::from(JinjaErrorKind::UnknownMethod))
+                        });
+                    },
+                }
 
-            Ok(())
-        });
+                Ok(())
+            },
+        );
 
         methods.add_method(
             "set_auto_escape_callback",
