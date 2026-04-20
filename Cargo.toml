@@ -38,7 +38,6 @@ minijinja = { version = "2.19.0", features = [
 minijinja-contrib = { version = "2.19.0", features = [
     "pycompat",
     "datetime",
-    "timezone",
     "rand",
     "html_entities",
     "wordcount",
