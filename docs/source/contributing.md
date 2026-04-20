@@ -3,6 +3,10 @@
 Contributions are welcome! Feel free to open bug reports, feature requests, or
 PRs.
 
+## Code of Conduct
+
+This project follows the [Rust Code of Conduct](https://rust-lang.org/policies/code-of-conduct)
+
 ## AI Policy
 
 AI is not allowed for communication, such as PR or issue report body content.
