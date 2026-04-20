@@ -106,6 +106,9 @@ local function normalize_metadata(meta)
             end
 
             v = pandoc.write(pandoc.Pandoc(v), "markdown"):gsub("\n$", "")
+        elseif t == "table" then
+            ---@cast v table
+            v = normalize_metadata(v)
         end
 
         ctx[k] = v
