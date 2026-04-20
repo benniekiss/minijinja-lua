@@ -49,5 +49,6 @@ mlua = { version = "0.11", features = ["serde"] }
 strip = true
 opt-level = "z"
 lto = true
+panic = "abort"
 codegen-units = 1
 rustflags = ["-Zlocation-detail=none", "-Zfmt-debug=none"]
