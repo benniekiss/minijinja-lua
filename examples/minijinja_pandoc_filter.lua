@@ -85,6 +85,35 @@ local function read_file(path)
     return content
 end
 
+--- Normalize a pandoc.Meta into a lua table
+---
+--- markdown formatting is supported for context values
+---
+---@param meta pandoc.Meta
+---
+---@return table
+local function normalize_metadata(meta)
+    local ctx = {}
+
+    for k, v in pairs(meta) do
+        local t = pandoc.utils.type(v)
+
+        if t == "Inlines" or t == "Blocks" then
+            ---@cast v pandoc.Inlines,pandoc.Blocks
+
+            if t == "Inlines" then
+                v = pandoc.Blocks(v)
+            end
+
+            v = pandoc.write(pandoc.Pandoc(v), "markdown"):gsub("\n$", "")
+        end
+
+        ctx[k] = v
+    end
+
+    return ctx
+end
+
 --- Check if an extension is a JSON extension
 ---
 ---@param ext string
@@ -184,21 +213,16 @@ local function load_context(context)
     local ctx
     if is_table then
         ---@cast context table
-
         ctx = context
     end
 
     if is_string then
         ---@cast context string
-
         ctx = load_context_from_file(context)
     end
 
-    -- Pandoc metadata contains `MetaValue` types, which get cast as userdata
-    -- when provided to minijinja. To sanitize these, encode to json, then decode
-    -- to lua explicitly as non-pandoc types.
     if ctx ~= nil then
-        ctx = pandoc.json.decode(pandoc.json.encode(ctx), false)
+        ctx = normalize_metadata(ctx)
     end
 
     return ctx
@@ -207,7 +231,7 @@ end
 --- Parse a pandoc yaml metadata for minijinja settings
 ---
 ---@param meta pandoc.Meta
-function filter.Meta(meta)
+local function Meta(meta)
     local mj = meta.minijinja
 
     if mj == nil then return end
@@ -234,18 +258,41 @@ end
 ---
 ---@return pandoc.Pandoc
 function filter.Pandoc(doc)
-    doc = doc:walk({ Meta = filter.Meta })
+    doc = doc:walk({ Meta = Meta })
 
     local env = minijinja.Environment:new()
 
-    env.reload_before_render = JinjaSettings.reload_before_render
-    env.keep_trailing_newline = JinjaSettings.keep_trailing_newline
-    env.trim_blocks = JinjaSettings.trim_blocks
-    env.lstrip_blocks = JinjaSettings.lstrip_blocks
-    env.debug = JinjaSettings.debug
-    env.fuel = JinjaSettings.fuel
-    env.recursion_limit = JinjaSettings.recursion_limit
-    env.undefined_behavior = JinjaSettings.undefined_behavior
+    if JinjaSettings.reload_before_render ~= nil then
+        env.reload_before_render = JinjaSettings.reload_before_render
+    end
+
+    if JinjaSettings.keep_trailing_newline ~= nil then
+        env.keep_trailing_newline = JinjaSettings.keep_trailing_newline
+    end
+
+    if JinjaSettings.trim_blocks ~= nil then
+        env.trim_blocks = JinjaSettings.trim_blocks
+    end
+
+    if JinjaSettings.lstrip_blocks ~= nil then
+        env.lstrip_blocks = JinjaSettings.lstrip_blocks
+    end
+
+    if JinjaSettings.debug ~= nil then
+        env.debug = JinjaSettings.debug
+    end
+
+    if JinjaSettings.fuel ~= nil then
+        env.fuel = JinjaSettings.fuel
+    end
+
+    if JinjaSettings.recursion_limit ~= nil then
+        env.recursion_limit = JinjaSettings.recursion_limit
+    end
+
+    if JinjaSettings.undefined_behavior ~= nil then
+        env.undefined_behavior = JinjaSettings.undefined_behavior
+    end
 
     env:set_pycompat(JinjaSettings.pycompat)
 

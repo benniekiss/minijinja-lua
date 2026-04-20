@@ -1,4 +1,4 @@
-local filter = require("minijinja_filter")
+local filter = require("minijinja_pandoc_filter")
 
 describe("Examples", function()
     describe("pandoc#examples", function()
@@ -16,7 +16,7 @@ Test: {{ foo }}
 
             local te = doc:walk(filter)
             local ex = pandoc.read(
-                [=[[ Para [ Str "$dollar",Space,Str "dollar",Space,Str "bills${test",Space,Str "string}[]" ]]]=],
+                [=[[ Para [Str "Test:",Space,Str "BOO"]]]=],
                 "native"
             )
 
