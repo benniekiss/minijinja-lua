@@ -24,16 +24,31 @@ vendored = ["mlua/vendored"]
 module = ["mlua/module"]
 
 [dependencies]
-minijinja = { version = "2.19.0", features = ["fuel", "indexmap", "json", "custom_syntax", "loop_controls", "percent-encoding", "preserve_order", "speedups", "unicode", "stacker"] }
-minijinja-contrib = { version = "2.19.0", features = ["datetime", "html_entities", "pycompat", "rand", "unicode_wordwrap", "wordcount"] }
-mlua = { version = "0.11", features = [ "serde" ] }
+minijinja = { version = "2.19.0", features = [
+    "unicode",
+    "fuel",
+    "custom_syntax",
+    "preserve_order",
+    "json",
+    "urlencode",
+    "loop_controls",
+    "speedups",
+    "stacker",
+] }
+minijinja-contrib = { version = "2.19.0", features = [
+    "pycompat",
+    "datetime",
+    "timezone",
+    "rand",
+    "html_entities",
+    "wordcount",
+    "unicode_wordwrap",
+] }
+mlua = { version = "0.11", features = ["serde"] }
 
 [profile.release]
 strip = true
 opt-level = "z"
 lto = true
 codegen-units = 1
-rustflags = [
-    "-Zlocation-detail=none",
-    "-Zfmt-debug=none",
-]
+rustflags = ["-Zlocation-detail=none", "-Zfmt-debug=none"]
