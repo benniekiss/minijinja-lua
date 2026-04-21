@@ -14,7 +14,7 @@ name = "minijinja_lua"
 crate-type = ["cdylib"]
 
 [features]
-default = ["lua54", "vendored"]
+default = ["lua54", "vendored", "json"]
 lua55 = ["mlua/lua55"]
 lua54 = ["mlua/lua54"]
 lua53 = ["mlua/lua53"]
@@ -22,6 +22,7 @@ lua52 = ["mlua/lua52"]
 lua51 = ["mlua/lua51"]
 vendored = ["mlua/vendored"]
 module = ["mlua/module"]
+json = ["dep:serde_json"]
 
 [dependencies]
 minijinja = { version = "2.19.0", features = [
@@ -44,6 +45,10 @@ minijinja-contrib = { version = "2.19.0", features = [
     "unicode_wordwrap",
 ] }
 mlua = { version = "0.11", features = ["serde"] }
+serde_json = { version = "1.0.149", features = [
+    "preserve_order",
+    "float_roundtrip",
+], optional = true }
 
 [profile.release]
 strip = true

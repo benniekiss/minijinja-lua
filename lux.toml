@@ -6,7 +6,7 @@ summary = "Lua bindings for minijinja"
 maintainer = "benniekiss"
 homepage = "https://github.com/benniekiss/minijinja-lua"
 issues_url = "https://github.com/benniekiss/minijinja-lua/issues"
-labels = [ "jinja", "minijinja", "template", "rust", "bindings" ]
+labels = ["jinja", "minijinja", "template", "rust", "bindings"]
 license = "MIT"
 
 [source]
@@ -16,8 +16,8 @@ dev = "git+https://github.com/benniekiss/$(PACKAGE)"
 [build]
 type = "rust-mlua"
 default_features = false
-features = ["module"]
-copy_directories = [ "library" ]
+features = ["module", "json"]
+copy_directories = ["library"]
 
 [build.modules]
 "minijinja" = "minijinja_lua"

@@ -59,6 +59,9 @@ impl LuaEnvironment {
         let mut env = Environment::new();
         minijinja_contrib::add_to_environment(&mut env);
 
+        #[cfg(feature = "json")]
+        crate::contrib::minijinja_filter_from_json(&mut env);
+
         Self {
             env: RwLock::new(env),
             reload_before_render: AtomicBool::new(false),
