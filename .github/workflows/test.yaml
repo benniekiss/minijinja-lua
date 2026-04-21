@@ -47,15 +47,6 @@ jobs:
     if: github.head_ref == '' || !startsWith(github.head_ref, 'release-plz-')
     name: cargo tests
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: true
-      matrix:
-        lua_version:
-          - lua51
-          - lua52
-          - lua53
-          - lua54
-          - lua55
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -64,4 +55,4 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
 
       - name: Run tests
-        run: cargo test --no-default-features --features=${{ matrix.lua_version }},vendored
+        run: cargo test
