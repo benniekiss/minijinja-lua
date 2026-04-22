@@ -60,7 +60,7 @@ impl LuaEnvironment {
         minijinja_contrib::add_to_environment(&mut env);
 
         #[cfg(feature = "json")]
-        crate::contrib::minijinja_filter_from_json(&mut env);
+        crate::contrib::json::minijinja_filter_from_json(&mut env);
 
         Self {
             env: RwLock::new(env),

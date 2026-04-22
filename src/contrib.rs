@@ -65,18 +65,20 @@ pub(crate) fn minijinja_path_loader(lua: &Lua) -> Result<LuaFunction, LuaError> 
 ///
 /// In Lua, this allows loading a json object while preserving key order.
 #[cfg(feature = "json")]
-pub(crate) fn minijinja_filter_from_json(env: &mut minijinja::Environment) {
+pub(crate) mod json {
     use minijinja::{Error as JinjaError, ErrorKind as JinjaErrorKind, State, Value as JinjaValue};
 
     use crate::convert::err_to_minijinja_err;
 
-    env.add_filter(
-        "fromjson",
-        |_: &State, json: &[u8]| -> Result<JinjaValue, JinjaError> {
-            serde_json::from_slice(json)
-                .map_err(|err| err_to_minijinja_err(err, JinjaErrorKind::BadSerialization))
-        },
-    )
+    pub(crate) fn minijinja_filter_from_json(env: &mut minijinja::Environment) {
+        env.add_filter(
+            "fromjson",
+            |_: &State, json: &[u8]| -> Result<JinjaValue, JinjaError> {
+                serde_json::from_slice(json)
+                    .map_err(|err| err_to_minijinja_err(err, JinjaErrorKind::BadSerialization))
+            },
+        )
+    }
 }
 
 #[cfg(test)]
@@ -159,9 +161,10 @@ mod test {
     }
 
     #[test]
+    #[cfg(feature = "json")]
     fn test_minijinja_from_json_filter() {
         let mut env = minijinja::Environment::new();
-        minijinja_filter_from_json(&mut env);
+        json::minijinja_filter_from_json(&mut env);
 
         let ex = json!({"1": 1, "2": 2, "three": [1,2,3]});
         let expr = env.compile_expression("te | fromjson").unwrap();
