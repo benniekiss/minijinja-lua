@@ -430,7 +430,8 @@ describe("Environment tests", function()
             local te = [[{"3":1,"2":{"b":1,"c":2,"a":3},"1":3}]]
 
             -- The filter should preserve key order
-            local rv = env:render_str("{% for k, v in te | fromjson | items %}{{ k }}: {{ v }} {% endfor %}", { te = te})
+            local rv =
+                env:render_str("{% for k, v in te | fromjson | items %}{{ k }}: {{ v }} {% endfor %}", { te = te })
 
             assert.Equal([[3: 1 2: {"b": 1, "c": 2, "a": 3} 1: 3 ]], rv)
         end)
