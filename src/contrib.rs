@@ -62,6 +62,8 @@ pub(crate) fn minijinja_path_loader(lua: &Lua) -> Result<LuaFunction, LuaError> 
 }
 
 /// This filter allows loading minijinja objects from a JSON string.
+///
+/// In Lua, this allows loading a json object while preserving key order.
 #[cfg(feature = "json")]
 pub(crate) fn minijinja_filter_from_json(env: &mut minijinja::Environment) {
     use minijinja::{Error as JinjaError, ErrorKind as JinjaErrorKind, State, Value as JinjaValue};
