@@ -95,36 +95,6 @@ pub(crate) mod datetime {
 
     use crate::convert::err_to_minijinja_err;
 
-    /// Default date formats if none are provided to the filter.
-    const DATE_FORMATS: &[&str] = &[
-        "%m/%d/%Y",      // 01/01/2000
-        "%m/%d/%y",      // 01/01/00
-        "%B %d, %Y",     // January 01, 2000
-        "%b %d, %Y",     // Jan 01, 2000
-        "%B %d %Y",      // January 01 2000
-        "%b %d %Y",      // Jan 01 2000
-        "%A %B %d %Y",   // Monday January 01 2000
-        "%A, %B %d, %Y", // Monday, January 01, 2000
-        "%a %B %d %Y",   // Mon January 01 2000
-        "%a, %B %d, %Y", // Mon, January 01, 2000
-        "%A %b %d %Y",   // Monday Jan 01 2000
-        "%A, %b %d, %Y", // Monday, Jan 01, 2000
-        "%a %b %d %Y",   // Mon Jan 01 2000
-        "%a, %b %d, %Y", // Mon, Jan 01, 2000
-    ];
-
-    /// Default time formats if none are provided to the filter.
-    const TIME_FORMATS: &[&str] = &[
-        "%I%t%p",       // 11 pm or 11pm
-        "%I%t%P",       // 11 PM or 11PM
-        "%H:%M",        // 23:00
-        "%H:%M:%S",     // 23:00:00
-        "%I:%M%t%p",    // 11:00 pm or 11:00pm
-        "%I:%M%t%P",    // 11:00 PM or 11:00PM
-        "%I:%M:%S%t%p", // 11:00:00 pm or 11:00:00pm
-        "%I:%M:%S%t%P", // 11:00:00 PM or 11:00:00PM
-    ];
-
     /// Formats a string into a date using the `jiff` crate.
     ///
     /// If `format` is provided, the date will be formatted according to the `strftime` format.
@@ -132,44 +102,42 @@ pub(crate) mod datetime {
     ///
     /// If `patterns` is provided, it must be a list of `strptime` format strings to parse the
     /// input. Multiple patterns can be provided to allow support for various date formats. If no
-    /// patterns are provided, the patterns in [`DATE_FORMATS`] are used.
-    ///
-    /// The input is first parsed by calling `.parse()`. If this fails, each pattern in `patterns`
-    /// is attempted in order. The first successful match is the parsed time.
+    /// patterns are provided or matched, then the default `jiff` formatting is used by calling
+    /// `.parse()`
     pub(crate) fn minijinja_filter_format_date(env: &mut minijinja::Environment) {
         env.add_filter(
             "datefmt",
             |_: &State, value: JinjaValue, kwargs: Kwargs| -> Result<String, JinjaError> {
                 let format = kwargs.get::<Option<&str>>("format")?;
-                let patterns = kwargs.get::<Option<Vec<String>>>("patterns")?.unwrap_or(
-                    DATE_FORMATS
-                        .iter()
-                        .map(|p| p.to_string())
-                        .collect::<Vec<String>>(),
-                );
+                let patterns = kwargs.get::<Option<Vec<String>>>("patterns")?;
                 kwargs.assert_all_used()?;
 
                 let date = match value.as_str() {
-                    Some(s) => s.parse::<Date>().or_else(|_| {
-                        patterns
+                    Some(s) => {
+                        // Try the provided patterns
+                        if let Some(date) = patterns
                             .iter()
+                            .flatten()
                             .find_map(|f| Date::strptime(f, s).ok())
-                            .ok_or(jiff::Error::from_args(format_args!(
-                                "could not parse value as a date: {}",
-                                s
-                            )))
-                    }),
+                        {
+                            Ok(date)
+                        } else {
+                            // Or fallback to the `jiff` parser
+                            s.parse::<Date>().map_err(|err| {
+                                err_to_minijinja_err(err, JinjaErrorKind::CannotDeserialize)
+                            })
+                        }
+                    },
                     None => Err(JinjaError::new(
                         JinjaErrorKind::CannotDeserialize,
                         "could not parse value as a string",
-                    ))?,
-                }
-                .map_err(|err| err_to_minijinja_err(err, JinjaErrorKind::CannotDeserialize))?;
+                    )),
+                }?;
 
-                match format {
-                    Some(f) => Ok(date.strftime(f).to_string()),
-                    None => Ok(date.to_string()),
-                }
+                Ok(match format {
+                    Some(f) => date.strftime(f).to_string(),
+                    None => date.to_string(),
+                })
             },
         );
     }
@@ -181,44 +149,42 @@ pub(crate) mod datetime {
     ///
     /// If `patterns` is provided, it must be a list of `strptime` format strings to parse the
     /// input. Multiple patterns can be provided to allow support for various date formats. If no
-    /// patterns are provided, the patterns in [`TIME_FORMATS`] are used.
-    ///
-    /// The input is first parsed by calling `.parse()`. If this fails, each pattern in `patterns`
-    /// is attempted in order. The first successful match is the parsed time.
+    /// patterns are provided or matched, then the default `jiff` formatting is used by calling
+    /// `.parse()`
     pub(crate) fn minijinja_filter_format_time(env: &mut minijinja::Environment) {
         env.add_filter(
             "timefmt",
             |_: &State, value: JinjaValue, kwargs: Kwargs| -> Result<String, JinjaError> {
                 let format = kwargs.get::<Option<&str>>("format")?;
-                let patterns = kwargs.get::<Option<Vec<String>>>("patterns")?.unwrap_or(
-                    TIME_FORMATS
-                        .iter()
-                        .map(|p| p.to_string())
-                        .collect::<Vec<String>>(),
-                );
+                let patterns = kwargs.get::<Option<Vec<String>>>("patterns")?;
                 kwargs.assert_all_used()?;
 
                 let time = match value.as_str() {
-                    Some(s) => s.parse::<Time>().or_else(|_| {
-                        patterns
+                    Some(s) => {
+                        // Try the provided patterns
+                        if let Some(date) = patterns
                             .iter()
+                            .flatten()
                             .find_map(|f| Time::strptime(f, s).ok())
-                            .ok_or(jiff::Error::from_args(format_args!(
-                                "could not parse value as a time: {}",
-                                s
-                            )))
-                    }),
+                        {
+                            Ok(date)
+                        } else {
+                            // Or fallback to the `jiff` parser
+                            s.parse::<Time>().map_err(|err| {
+                                err_to_minijinja_err(err, JinjaErrorKind::CannotDeserialize)
+                            })
+                        }
+                    },
                     None => Err(JinjaError::new(
                         JinjaErrorKind::CannotDeserialize,
                         "could not parse value as a string",
-                    ))?,
-                }
-                .map_err(|err| err_to_minijinja_err(err, JinjaErrorKind::CannotDeserialize))?;
+                    )),
+                }?;
 
-                match format {
-                    Some(f) => Ok(time.strftime(f).to_string()),
-                    None => Ok(time.to_string()),
-                }
+                Ok(match format {
+                    Some(f) => time.strftime(f).to_string(),
+                    None => time.to_string(),
+                })
             },
         );
     }
@@ -323,29 +289,13 @@ mod test {
         let mut env = minijinja::Environment::new();
         datetime::minijinja_filter_format_date(&mut env);
 
-        let tests = [
-            ("12/31/2000", "2000-12-31"),
-            ("12/31/00", "0000-12-31"),
-            ("December 31, 2000", "2000-12-31"),
-            ("Dec 31, 2000", "2000-12-31"),
-            ("December 31 2000", "2000-12-31"),
-            ("Dec 31 2000", "2000-12-31"),
-            ("Sunday December 31 2000", "2000-12-31"),
-            ("Sunday, December 31, 2000", "2000-12-31"),
-            ("Sun December 31 2000", "2000-12-31"),
-            ("Sun, December 31, 2000", "2000-12-31"),
-            ("Sunday Dec 31 2000", "2000-12-31"),
-            ("Sunday, Dec 31, 2000", "2000-12-31"),
-            ("Sun Dec 31 2000", "2000-12-31"),
-            ("Sun, Dec 31, 2000", "2000-12-31"),
-        ];
+        let date = "2000-01-01";
+        let ex = "2000-01-01";
 
-        for (te, ex) in tests {
-            let expr = env.compile_expression("te | datefmt").unwrap();
-            let res = expr.eval(context! { te => te }).unwrap();
+        let expr = env.compile_expression("te | datefmt").unwrap();
+        let res = expr.eval(context! { te => date }).unwrap();
 
-            assert_eq!(res.as_str().unwrap(), ex, "{} should parse to {}", te, ex);
-        }
+        assert_eq!(res.as_str().unwrap(), ex, "{} should parse to {}", date, ex);
     }
 
     #[test]
@@ -354,7 +304,8 @@ mod test {
         let mut env = minijinja::Environment::new();
         datetime::minijinja_filter_format_date(&mut env);
 
-        let date = "January 1, 2026";
+        let date: &str = "2000-01-01T11:12:13";
+        let ex = "January 1, 2000";
         let fmt = "%B %-d, %Y";
 
         let te = format!("te | datefmt(format='{}')", fmt);
@@ -362,7 +313,7 @@ mod test {
 
         let res = expr.eval(context! { te => date }).unwrap();
 
-        assert_eq!(res.as_str().unwrap(), "January 1, 2026");
+        assert_eq!(res.as_str().unwrap(), ex, "{} should parse to {}", date, ex);
     }
 
     #[test]
@@ -372,6 +323,7 @@ mod test {
         datetime::minijinja_filter_format_date(&mut env);
 
         let date = "2026 1 January";
+        let ex = "2026-01-01";
         let patt = "%Y %-d %B";
 
         let te = format!("te | datefmt(patterns=['{}'])", patt);
@@ -379,7 +331,7 @@ mod test {
 
         let res = expr.eval(context! { te => date }).unwrap();
 
-        assert_eq!(res.as_str().unwrap(), "2026-01-01");
+        assert_eq!(res.as_str().unwrap(), ex, "{} should parse to {}", date, ex);
     }
 
     #[test]
@@ -388,29 +340,13 @@ mod test {
         let mut env = minijinja::Environment::new();
         datetime::minijinja_filter_format_time(&mut env);
 
-        let tests = [
-            ("11 pm", "23:00:00"),
-            ("11pm", "23:00:00"),
-            ("11 PM", "23:00:00"),
-            ("11PM", "23:00:00"),
-            ("23:15", "23:15:00"),
-            ("23:15:00", "23:15:00"),
-            ("11:15 pm", "23:15:00"),
-            ("11:15pm", "23:15:00"),
-            ("11:15 PM", "23:15:00"),
-            ("11:15PM", "23:15:00"),
-            ("11:15:00 pm", "23:15:00"),
-            ("11:15:00pm", "23:15:00"),
-            ("11:15:00 PM", "23:15:00"),
-            ("11:15:00PM", "23:15:00"),
-        ];
+        let time = "2000-01-01T11:12:13";
+        let ex = "11:12:13";
 
-        for (te, ex) in tests {
-            let expr = env.compile_expression("te | timefmt").unwrap();
-            let res = expr.eval(context! { te => te }).unwrap();
+        let expr = env.compile_expression("te | timefmt").unwrap();
+        let res = expr.eval(context! { te => time }).unwrap();
 
-            assert_eq!(res.as_str().unwrap(), ex, "{} should parse to {}", te, ex);
-        }
+        assert_eq!(res.as_str().unwrap(), ex, "{} should parse to {}", time, ex);
     }
 
     #[test]
@@ -420,6 +356,7 @@ mod test {
         datetime::minijinja_filter_format_time(&mut env);
 
         let time = "12:02:31";
+        let ex = "31:02:12";
         let fmt = "%S:%M:%H";
 
         let te = format!("te | timefmt(format='{}')", fmt);
@@ -427,7 +364,7 @@ mod test {
 
         let res = expr.eval(context! { te => time }).unwrap();
 
-        assert_eq!(res.as_str().unwrap(), "31:02:12");
+        assert_eq!(res.as_str().unwrap(), ex, "{} should parse to {}", time, ex);
     }
 
     #[test]
@@ -437,6 +374,7 @@ mod test {
         datetime::minijinja_filter_format_time(&mut env);
 
         let time = "04 02 09";
+        let ex = "02:04:09";
         let patt = "%M %H %S";
 
         let te = format!("te | timefmt(patterns=['{}'])", patt);
@@ -444,6 +382,6 @@ mod test {
 
         let res = expr.eval(context! { te => time }).unwrap();
 
-        assert_eq!(res.as_str().unwrap(), "02:04:09");
+        assert_eq!(res.as_str().unwrap(), ex, "{} should parse to {}", time, ex);
     }
 }
