@@ -61,29 +61,30 @@ pub(crate) fn minijinja_path_loader(lua: &Lua) -> Result<LuaFunction, LuaError> 
     .eval()
 }
 
-/// This filter allows loading minijinja objects from a JSON string.
-///
-/// In Lua, this allows loading a json object while preserving key order.
+/// Filters to work with JSON strings and objects.
 #[cfg(feature = "json")]
-pub(crate) mod json {
+pub mod json {
     use minijinja::{Error as JinjaError, ErrorKind as JinjaErrorKind, State, Value as JinjaValue};
 
     use crate::convert::err_to_minijinja_err;
 
-    pub(crate) fn minijinja_filter_from_json(env: &mut minijinja::Environment) {
-        env.add_filter(
-            "fromjson",
-            |_: &State, json: &[u8]| -> Result<JinjaValue, JinjaError> {
-                serde_json::from_slice(json)
-                    .map_err(|err| err_to_minijinja_err(err, JinjaErrorKind::BadSerialization))
-            },
-        )
+    /// Add the filters to the environment
+    pub fn add_to_environment(env: &mut minijinja::Environment) {
+        env.add_filter("fromjson", fromjson);
+    }
+
+    /// This filter allows loading minijinja objects from a JSON string.
+    ///
+    /// In Lua, this allows loading a JSON object while preserving key order.
+    pub fn fromjson(_: &State, json: &[u8]) -> Result<JinjaValue, JinjaError> {
+        serde_json::from_slice(json)
+            .map_err(|err| err_to_minijinja_err(err, JinjaErrorKind::BadSerialization))
     }
 }
 
-/// These filters allow formatting date and time strings using strftime style formats.
+/// Filters to format date and time strings.
 #[cfg(feature = "datetime")]
-pub(crate) mod datetime {
+pub mod datetime {
     use jiff::civil::{Date, Time};
     use minijinja::{
         Error as JinjaError,
@@ -95,98 +96,96 @@ pub(crate) mod datetime {
 
     use crate::convert::err_to_minijinja_err;
 
-    /// Formats a string into a date using the `jiff` crate.
-    ///
-    /// If `format` is provided, the date will be formatted according to the `strftime` format.
-    /// Otherwise, the value from `jiff::civil::Date::to_string` is returned.
-    ///
-    /// If `patterns` is provided, it must be a list of `strptime` format strings to parse the
-    /// input. Multiple patterns can be provided to allow support for various date formats. If no
-    /// patterns are provided or matched, then the default `jiff` formatting is used by calling
-    /// `.parse()`
-    pub(crate) fn minijinja_filter_format_date(env: &mut minijinja::Environment) {
-        env.add_filter(
-            "datefmt",
-            |_: &State, value: JinjaValue, kwargs: Kwargs| -> Result<String, JinjaError> {
-                let format = kwargs.get::<Option<&str>>("format")?;
-                let patterns = kwargs.get::<Option<Vec<String>>>("patterns")?;
-                kwargs.assert_all_used()?;
-
-                let date = match value.as_str() {
-                    Some(s) => {
-                        // Try the provided patterns
-                        if let Some(date) = patterns
-                            .iter()
-                            .flatten()
-                            .find_map(|f| Date::strptime(f, s).ok())
-                        {
-                            Ok(date)
-                        } else {
-                            // Or fallback to the `jiff` parser
-                            s.parse::<Date>().map_err(|err| {
-                                err_to_minijinja_err(err, JinjaErrorKind::CannotDeserialize)
-                            })
-                        }
-                    },
-                    None => Err(JinjaError::new(
-                        JinjaErrorKind::CannotDeserialize,
-                        "could not parse value as a string",
-                    )),
-                }?;
-
-                Ok(match format {
-                    Some(f) => date.strftime(f).to_string(),
-                    None => date.to_string(),
-                })
-            },
-        );
+    /// Add the filters to the environment
+    pub fn add_to_environment(env: &mut minijinja::Environment) {
+        env.add_filter("datefmt", datefmt);
+        env.add_filter("timefmt", timefmt);
     }
 
-    /// Formats a string into a time using the `jiff` crate.
+    /// Formats a string into a date using the [`jiff`] crate.
+    ///
+    /// If the `format` keyword is provided, the date will be formatted according to the `strftime`
+    /// format. Otherwise, the value from [`date.to_string`](jiff::civil::Date) is returned.
+    ///
+    /// If the `patterns` keyword is provided, it must be a list of `strptime` format strings to
+    /// parse the input. Multiple patterns can be provided to allow support for various date
+    /// formats. If no patterns are provided or matched, then the default [`jiff`] formatting is
+    /// used by calling `.parse()`
+    ///
+    /// See here for available formatting patterns: <https://docs.rs/jiff/latest/jiff/fmt/strtime/index.html>
+    pub fn datefmt(_: &State, value: JinjaValue, kwargs: Kwargs) -> Result<String, JinjaError> {
+        let format = kwargs.get::<Option<&str>>("format")?;
+        let patterns = kwargs.get::<Option<Vec<String>>>("patterns")?;
+        kwargs.assert_all_used()?;
+
+        let date = match value.as_str() {
+            Some(s) => {
+                // Try the provided patterns
+                if let Some(date) = patterns
+                    .iter()
+                    .flatten()
+                    .find_map(|f| Date::strptime(f, s).ok())
+                {
+                    Ok(date)
+                } else {
+                    // Or fallback to the `jiff` parser
+                    s.parse::<Date>()
+                        .map_err(|err| err_to_minijinja_err(err, JinjaErrorKind::CannotDeserialize))
+                }
+            },
+            None => Err(JinjaError::new(
+                JinjaErrorKind::CannotDeserialize,
+                "could not parse value as a string",
+            )),
+        }?;
+
+        Ok(match format {
+            Some(f) => date.strftime(f).to_string(),
+            None => date.to_string(),
+        })
+    }
+
+    /// Formats a string into a time using the [`jiff`] crate.
     ///
     /// If `format` is provided, the time will be formatted according to the `strftime` format.
-    /// Otherwise, the value from `jiff::civil::Time::to_string` is returned.
+    /// Otherwise, the value from [`time.to_string()`](jiff::civil::Time) is returned.
     ///
     /// If `patterns` is provided, it must be a list of `strptime` format strings to parse the
     /// input. Multiple patterns can be provided to allow support for various date formats. If no
-    /// patterns are provided or matched, then the default `jiff` formatting is used by calling
+    /// patterns are provided or matched, then the default [`jiff`] formatting is used by calling
     /// `.parse()`
-    pub(crate) fn minijinja_filter_format_time(env: &mut minijinja::Environment) {
-        env.add_filter(
-            "timefmt",
-            |_: &State, value: JinjaValue, kwargs: Kwargs| -> Result<String, JinjaError> {
-                let format = kwargs.get::<Option<&str>>("format")?;
-                let patterns = kwargs.get::<Option<Vec<String>>>("patterns")?;
-                kwargs.assert_all_used()?;
+    ///
+    /// See here for available formatting patterns: <https://docs.rs/jiff/latest/jiff/fmt/strtime/index.html>
+    pub fn timefmt(_: &State, value: JinjaValue, kwargs: Kwargs) -> Result<String, JinjaError> {
+        let format = kwargs.get::<Option<&str>>("format")?;
+        let patterns = kwargs.get::<Option<Vec<String>>>("patterns")?;
+        kwargs.assert_all_used()?;
 
-                let time = match value.as_str() {
-                    Some(s) => {
-                        // Try the provided patterns
-                        if let Some(date) = patterns
-                            .iter()
-                            .flatten()
-                            .find_map(|f| Time::strptime(f, s).ok())
-                        {
-                            Ok(date)
-                        } else {
-                            // Or fallback to the `jiff` parser
-                            s.parse::<Time>().map_err(|err| {
-                                err_to_minijinja_err(err, JinjaErrorKind::CannotDeserialize)
-                            })
-                        }
-                    },
-                    None => Err(JinjaError::new(
-                        JinjaErrorKind::CannotDeserialize,
-                        "could not parse value as a string",
-                    )),
-                }?;
-
-                Ok(match format {
-                    Some(f) => time.strftime(f).to_string(),
-                    None => time.to_string(),
-                })
+        let time = match value.as_str() {
+            Some(s) => {
+                // Try the provided patterns
+                if let Some(date) = patterns
+                    .iter()
+                    .flatten()
+                    .find_map(|f| Time::strptime(f, s).ok())
+                {
+                    Ok(date)
+                } else {
+                    // Or fallback to the `jiff` parser
+                    s.parse::<Time>()
+                        .map_err(|err| err_to_minijinja_err(err, JinjaErrorKind::CannotDeserialize))
+                }
             },
-        );
+            None => Err(JinjaError::new(
+                JinjaErrorKind::CannotDeserialize,
+                "could not parse value as a string",
+            )),
+        }?;
+
+        Ok(match format {
+            Some(f) => time.strftime(f).to_string(),
+            None => time.to_string(),
+        })
     }
 }
 
@@ -273,7 +272,7 @@ mod test {
     #[cfg(feature = "json")]
     fn test_minijinja_from_json_filter() {
         let mut env = minijinja::Environment::new();
-        json::minijinja_filter_from_json(&mut env);
+        json::add_to_environment(&mut env);
 
         let ex = json!({"1": 1, "2": 2, "three": [1,2,3]});
         let expr = env.compile_expression("te | fromjson").unwrap();
@@ -287,7 +286,7 @@ mod test {
     #[cfg(feature = "datetime")]
     fn test_minijinja_datefmt_filter() {
         let mut env = minijinja::Environment::new();
-        datetime::minijinja_filter_format_date(&mut env);
+        datetime::add_to_environment(&mut env);
 
         let date = "2000-01-01";
         let ex = "2000-01-01";
@@ -302,7 +301,7 @@ mod test {
     #[cfg(feature = "datetime")]
     fn test_minijinja_datefmt_filter_format() {
         let mut env = minijinja::Environment::new();
-        datetime::minijinja_filter_format_date(&mut env);
+        datetime::add_to_environment(&mut env);
 
         let date: &str = "2000-01-01T11:12:13";
         let ex = "January 1, 2000";
@@ -320,7 +319,7 @@ mod test {
     #[cfg(feature = "datetime")]
     fn test_minijinja_datefmt_filter_parse() {
         let mut env = minijinja::Environment::new();
-        datetime::minijinja_filter_format_date(&mut env);
+        datetime::add_to_environment(&mut env);
 
         let date = "2026 1 January";
         let ex = "2026-01-01";
@@ -338,7 +337,7 @@ mod test {
     #[cfg(feature = "datetime")]
     fn test_minijinja_timefmt_filter() {
         let mut env = minijinja::Environment::new();
-        datetime::minijinja_filter_format_time(&mut env);
+        datetime::add_to_environment(&mut env);
 
         let time = "2000-01-01T11:12:13";
         let ex = "11:12:13";
@@ -353,7 +352,7 @@ mod test {
     #[cfg(feature = "datetime")]
     fn test_minijinja_timefmt_filter_format() {
         let mut env = minijinja::Environment::new();
-        datetime::minijinja_filter_format_time(&mut env);
+        datetime::add_to_environment(&mut env);
 
         let time = "12:02:31";
         let ex = "31:02:12";
@@ -371,7 +370,7 @@ mod test {
     #[cfg(feature = "datetime")]
     fn test_minijinja_timefmt_filter_parse() {
         let mut env = minijinja::Environment::new();
-        datetime::minijinja_filter_format_time(&mut env);
+        datetime::add_to_environment(&mut env);
 
         let time = "04 02 09";
         let ex = "02:04:09";
