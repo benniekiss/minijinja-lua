@@ -57,6 +57,8 @@ impl LuaEnvironment {
     /// Get a new environment
     pub(crate) fn new() -> Self {
         let mut env = Environment::new();
+
+        #[cfg(feature = "minijinja-contrib")]
         minijinja_contrib::add_to_environment(&mut env);
 
         #[cfg(feature = "json")]
