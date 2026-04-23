@@ -22,12 +22,13 @@ lua52 = ["mlua/lua52"]
 lua51 = ["mlua/lua51"]
 vendored = ["mlua/vendored"]
 module = ["mlua/module"]
-contrib = ["json", "minijinja-contrib"]
+contrib = ["minijinja-contrib", "json", "datetime"]
 minijinja-contrib = ["dep:minijinja-contrib"]
-timezone = ["minijinja-contrib/timezone"]
 json = ["dep:serde_json"]
+datetime = ["dep:jiff"]
 
 [dependencies]
+jiff = { version = "0.2.23", optional = true, features = ["serde"] }
 minijinja = { version = "2.19.0", features = [
     "unicode",
     "fuel",

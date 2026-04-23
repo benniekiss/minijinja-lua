@@ -64,6 +64,12 @@ impl LuaEnvironment {
         #[cfg(feature = "json")]
         crate::contrib::json::minijinja_filter_from_json(&mut env);
 
+        #[cfg(feature = "datetime")]
+        {
+            crate::contrib::datetime::minijinja_filter_format_date(&mut env);
+            crate::contrib::datetime::minijinja_filter_format_time(&mut env);
+        }
+
         Self {
             env: RwLock::new(env),
             reload_before_render: AtomicBool::new(false),
