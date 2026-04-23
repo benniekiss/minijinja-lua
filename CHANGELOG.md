@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.15](https://github.com/benniekiss/minijinja-lua/compare/v0.1.14...v0.1.15) - 2026-04-23
+
+### Added
+
+- add datefmt and timefmt filters
+- add filter to load json into a minijinja object
+
+### Fixed
+
+- set correct crate features for lux
+- *(ci)* use correct action input name
+- *(deps)* remove `timezone` feature
+
+### Other
+
+- restructure contrib modules and add docs
+- remove default formats
+- put minijinja-contrib behind a feature
+- organize json filter into a module
+- *(deps)* update renovatebot/github-action action to v46.1.10 ([#30](https://github.com/benniekiss/minijinja-lua/pull/30))
+- add comment
+- run lx fmt
+- fix cargo test workflow
+- strip panic handling
+- cleanup minijinja features
+- *(docs)* add code of conduct
+
 ## [0.1.14](https://github.com/benniekiss/minijinja-lua/compare/v0.1.13...v0.1.14) - 2026-04-20
 
 ### Fixed
