@@ -16,7 +16,7 @@ dev = "git+https://github.com/benniekiss/$(PACKAGE)"
 [build]
 type = "rust-mlua"
 default_features = false
-features = ["module", "json"]
+features = ["module", "contrib"]
 copy_directories = ["library"]
 
 [build.modules]
