@@ -35,12 +35,6 @@ jobs:
           - { os: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu }
           - { os: macos-14, target: aarch64-apple-darwin }
           - { os: windows-2025, target: x86_64-pc-windows-msvc }
-        lua_version:
-          - lua51
-          - lua52
-          - lua53
-          - lua54
-          - lua55
 
     env:
       CARGO_INCREMENTAL: 0
@@ -82,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           if-no-files-found: "error"
-          name: minijinja-lua-${{ matrix.job.target }}-${{ matrix.lua_version }}
+          name: minijinja-lua-${{ matrix.job.target }}
           path: |
             *.rock
 
@@ -97,7 +91,6 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           merge-multiple: true
-          skip-decompress: true
 
       - name: Upload release
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
@@ -106,7 +99,7 @@ jobs:
           fail_on_unmatched_files: true
           overwrite_files: false
           files: |
-            *.zip
+            *.rock
 
   luarocks-upload:
     if: ${{ !inputs.skip_luarocks_upload }}
