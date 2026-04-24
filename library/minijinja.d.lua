@@ -61,13 +61,17 @@ local minijinja = {}
 ---
 --- It takes a [`State`](lua-minijinja.State) as the first paramter followed by any number of args.
 ---
----@alias minijinja.Callback fun(state: minijinja.State, ...): any
+--- If the last argument is a table, it will be interpreted as keyword arguments passed to the callback.
+---
+---@alias minijinja.Callback fun(state: minijinja.State, ..., kwargs?: table): any
 
 --- A stateless minijinja callback.
 ---
 --- Similar to a [`Callback`](lua-minijinja.Callback), but it is not passed a [`State`](lua-minijinja.State).
 ---
----@alias minijinja.CallbackStateless fun(...): any
+--- If the last argument is a table, it will be interpreted as keyword arguments passed to the callback.
+---
+---@alias minijinja.CallbackStateless fun(..., kwargs?: table): any
 
 --- A minijinja global variable.
 ---
