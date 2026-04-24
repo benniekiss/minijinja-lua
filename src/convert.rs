@@ -44,19 +44,19 @@ use mlua::{
 use crate::state::{JinjaState, with_lua};
 
 pub(crate) trait LuaObject {
-    /// Create a new wrapper around the `mlua::Value` associated with `key`
+    /// Create a new wrapper around the [`mlua::Value`] associated with `key`
     fn new(key: LuaRegistryKey) -> Self;
 
     /// Get the stored `RegistryKey`
     fn key(&self) -> Arc<LuaRegistryKey>;
 
-    /// Whether to pass a `minijinja::State` to function calls, if provided
+    /// Whether to pass a [`minijinja::State`] to function calls, if provided
     fn pass_state(&self) -> bool;
 
-    /// Set whether to pass a `minijinja::State` to function calls, if provided
+    /// Set whether to pass a [`minijinja::State`] to function calls, if provided
     fn set_pass_state(&mut self, enable: bool);
 
-    /// Execute a callback with `mlua::Lua` and the retrieved `mlua::Value` as arguments
+    /// Execute a callback with [`mlua::Lua`] and the retrieved [`mlua::Value`] as arguments
     fn with<R, F, T>(&self, f: F) -> Result<R, JinjaError>
     where
         F: FnOnce(&Lua, T) -> Result<R, LuaError>,
@@ -71,9 +71,9 @@ pub(crate) trait LuaObject {
     }
 }
 
-/// A wrapper around an `mlua::Function`. It provides access to the `mlua::Function`
+/// A wrapper around an [`mlua::Function`]. It provides access to the [`mlua::Function`]
 /// within a `minijinja` context by dynamically getting the object via the stored
-/// `RegistryKey`.
+/// [`mlua::RegistryKey`].
 #[derive(Debug)]
 pub(crate) struct LuaFunctionObject {
     key: Arc<LuaRegistryKey>,
@@ -89,7 +89,7 @@ impl LuaFunctionObject {
         self.with(|lua, func: LuaFunction| {
             let mut mv = minijinja_args_to_lua(lua, args);
 
-            // Using `Lua::Scope` here allows passing the `minijinja::State` to the callback. Since
+            // Using `Lua::scope` here allows passing the `minijinja::State` to the callback. Since
             // `minijinja::State` is not `'static`, this enables passing a temporarily created
             // `mlua::UserData` to the callback, which is then destructured at the end of the scope.
             //
@@ -169,9 +169,9 @@ impl JinjaObject for LuaFunctionObject {
     }
 }
 
-/// A wrapper around an `mlua::Table`. It provides access to the `mlua::Table`
+/// A wrapper around an [`mlua::Table`]. It provides access to the [`mlua::Table`]
 /// within a `minijinja` context by dynamically getting the object via the stored
-/// `RegistryKey`.
+/// [`mlua::RegistryKey`].
 #[derive(Debug)]
 pub(crate) struct LuaTableObject {
     key: Arc<LuaRegistryKey>,
@@ -380,9 +380,9 @@ impl JinjaObject for LuaTableObject {
     }
 }
 
-/// A wrapper around an `mlua::UserData`. It provides access to the `mlua::UserData`
+/// A wrapper around an [`mlua::UserData`]. It provides access to the [`mlua::UserData`]
 /// within a `minijinja` context by dynamically getting the object via the stored
-/// `RegistryKey`.
+/// [`mlua::RegistryKey`].
 #[derive(Debug)]
 pub(crate) struct LuaUserDataObject {
     key: Arc<LuaRegistryKey>,
@@ -520,11 +520,11 @@ impl JinjaObject for LuaUserDataObject {
     }
 }
 
-/// Convert an `mlua::Value` to a `minijinja::value::Value`.
+/// Convert an [`mlua::Value`] to a [`minijinja::Value`].
 ///
-/// If the `mlua::Value` is an `mlua::Table` that is not array-like, it is wrapped in a
-/// `LuaTableObject`. Otherwise, the  object is serialized to a `minijinja::value::Value` via
-/// `serde` using `minijinja::value::Value::from_serialize`
+/// If the [`mlua::Value`] is an [`mlua::Table`] that is not array-like, it is wrapped in a
+/// [`LuaTableObject`]. Otherwise, the  object is serialized to a [`minijinja::Value`] via
+/// `serde` using [`minijinja::Value::from_serialize`]
 pub(crate) fn lua_to_minijinja(lua: &Lua, value: &LuaValue) -> Option<JinjaValue> {
     match value {
         LuaValue::UserData(userdata) => {
@@ -558,8 +558,8 @@ pub(crate) fn lua_to_minijinja(lua: &Lua, value: &LuaValue) -> Option<JinjaValue
                 Err(_) => None,
             }
         },
-        // minijinja::value::Value::from_serialize converts `mlua::Value::Nil` to
-        // `minijinja::value::Value::None` otherwise. Semantically, `None` is more
+        // minijinja::Value::from_serialize converts `mlua::Value::Nil` to
+        // `minijinja::Value::None` otherwise. Semantically, `None` is more
         // similar to the `mlua::NULL` value.
         LuaValue::Nil => Some(JinjaValue::UNDEFINED),
         v if v.is_null() => Some(JinjaValue::from(())),
@@ -567,11 +567,11 @@ pub(crate) fn lua_to_minijinja(lua: &Lua, value: &LuaValue) -> Option<JinjaValue
     }
 }
 
-/// Convert a 'minijinja::value::Value` to an `mlua::Value`.
+/// Convert a [`minijinja::Value`] to an [`mlua::Value`].
 ///
-/// The underlying `mlua::Value` for `T: LuaObject` is retrieved so that
-/// round trips lua -> minijinja -> lua maintain access to the same `mlua::Value`.
-/// Otherwise, objects are converted with `mlua::Lua::to_value` via `serde`
+/// If the [`minijinja::Value`] is a [`LuaObject`], the underlying [`mlua::Table`] is retrieved so
+/// that round trips `lua -> minijinja -> lua` maintain access to the same [`mlua::Table`].
+/// Otherwise, objects are converted via `serde` using [`mlua::Lua::to_value`].
 pub(crate) fn minijinja_to_lua(lua: &Lua, value: &JinjaValue) -> Option<LuaValue> {
     if let Some(obj) = value.downcast_object_ref::<LuaUserDataObject>() {
         let userdata = lua.registry_value::<LuaAnyUserData>(&obj.key).ok()?;
@@ -598,7 +598,7 @@ pub(crate) fn minijinja_to_lua(lua: &Lua, value: &JinjaValue) -> Option<LuaValue
     }
 }
 
-/// Convert a slice of `minijinja::value::Value` to an `mlua::MultiValue`
+/// Convert a slice of [`minijinja::Value`] to an [`mlua::MultiValue`]
 ///
 /// This is used to convert arguments passed to minijinja filters, tests, and
 /// functions into lua arguments to be handled by the registered lua callbacks.
@@ -609,13 +609,13 @@ pub(crate) fn minijinja_args_to_lua(lua: &Lua, args: &[JinjaValue]) -> LuaMultiV
     )
 }
 
-/// Convert `mlua::Variadic` arguments into a `Vec<minijinja::Value>`
+/// Convert [`mlua::Variadic`] arguments into a [`Vec<minijinja::Value>`](minijinja::value::ArgType)
 ///
 /// If `accept_kwargs` is `true`, special handling is applied to the last argument if it is an
-/// `mlua::Table` by converting it to `minijinja::value::Kwargs`.
+/// [`mlua::Table`] by converting it to [`minijinja::value::Kwargs`].
 ///
-/// This is currently only used in the `State` methods `apply_filter`, `perform_test`, and
-/// `call_macro` to pass keyword arguments to those callbacks.
+/// This is currently only used in the [`JinjaState`] methods `apply_filter()`, `perform_test()`,
+/// and `call_macro()` to pass keyword arguments to those callbacks.
 pub(crate) fn lua_args_to_minijinja(
     lua: &Lua,
     mut args: LuaVariadic<LuaValue>,
@@ -651,7 +651,7 @@ pub(crate) fn lua_args_to_minijinja(
     args
 }
 
-/// Convert an `mlua::Error` error into the specified `minijinja::Error`
+/// Convert an [`mlua::Error`] error into the specified [`minijinja::ErrorKind`]
 pub(crate) fn err_to_minijinja_err<T: std::error::Error>(
     err: T,
     kind: JinjaErrorKind,
@@ -659,7 +659,7 @@ pub(crate) fn err_to_minijinja_err<T: std::error::Error>(
     JinjaError::new(kind, err.to_string())
 }
 
-/// Convert a `minijinja::AutoEscape` variant to a string
+/// Convert a [`minijinja::AutoEscape`] variant to a string
 pub(crate) fn auto_escape_to_lua(autoescape: AutoEscape) -> Option<String> {
     match autoescape {
         AutoEscape::Html => Some("html".to_string()),
@@ -670,7 +670,7 @@ pub(crate) fn auto_escape_to_lua(autoescape: AutoEscape) -> Option<String> {
     }
 }
 
-/// Convert a string to a `minijinja::AutoEscape` variant
+/// Convert a string to a [`minijinja::AutoEscape`] variant
 pub(crate) fn lua_to_auto_escape(autoescape: &str) -> Result<AutoEscape, LuaError> {
     let au = match autoescape.to_lowercase().as_str() {
         "html" => AutoEscape::Html,
@@ -681,7 +681,7 @@ pub(crate) fn lua_to_auto_escape(autoescape: &str) -> Result<AutoEscape, LuaErro
     Ok(au)
 }
 
-/// Convert a `minijinja::UndefinedBehavior` variant to a string
+/// Convert a [`minijinja::UndefinedBehavior`] variant to a string
 ///
 /// The conversion is case-insensitive
 pub(crate) fn undefined_behavior_to_lua(behavior: UndefinedBehavior) -> Option<String> {
@@ -694,7 +694,7 @@ pub(crate) fn undefined_behavior_to_lua(behavior: UndefinedBehavior) -> Option<S
     }
 }
 
-/// Convert a string to a `minijinja::UndefinedBehavior` variant.
+/// Convert a string to a [`minijinja::UndefinedBehavior`] variant.
 ///
 /// The conversion is case-insensitive
 pub(crate) fn lua_to_undefined_behavior(behavior: &str) -> Result<UndefinedBehavior, LuaError> {
@@ -709,7 +709,7 @@ pub(crate) fn lua_to_undefined_behavior(behavior: &str) -> Result<UndefinedBehav
     Ok(ub)
 }
 
-/// Convert an `mlua::Table` to a `minijinja::SyntaxConfig`
+/// Convert an [`mlua::Table`] to a [`minijinja::syntax::SyntaxConfig`]
 pub(crate) fn lua_to_syntax_config(syntax: LuaTable) -> Result<SyntaxConfig, JinjaError> {
     let defaults = SyntaxConfig::default();
 
@@ -777,7 +777,7 @@ fn optional_string(syntax: &LuaTable, name: &str) -> Result<Option<String>, Jinj
     }
 }
 
-/// Helper to parse an `mlua::Table` into `minijinja::SyntaxConfig` setting arguments.
+/// Helper to parse an [`mlua::Table`] into [`minijinja::syntax::SyntaxConfig`] setting arguments.
 ///
 /// Valid values are array-like tables with only 2 items.
 fn table_to_syntax_args(table: &LuaTable, name: &str) -> Result<(String, String), JinjaError> {
@@ -812,7 +812,7 @@ fn table_to_syntax_args(table: &LuaTable, name: &str) -> Result<(String, String)
     }
 }
 
-/// Check if an `mlua::Table` is array-like. That is, check if all of the
+/// Check if an [`mlua::Table`] is array-like. That is, check if all of the
 /// keys are sequential numbers with no holes.
 ///
 /// Empty tables can optionally be encoded as arrays.

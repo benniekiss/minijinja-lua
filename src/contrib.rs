@@ -75,7 +75,7 @@ pub mod json {
 
     /// This filter allows loading minijinja objects from a JSON string.
     ///
-    /// In Lua, this allows loading a JSON object while preserving key order.
+    /// In lua, this allows loading a JSON object while preserving key order.
     pub fn fromjson(_: &State, json: &[u8]) -> Result<JinjaValue, JinjaError> {
         serde_json::from_slice(json)
             .map_err(|err| err_to_minijinja_err(err, JinjaErrorKind::BadSerialization))

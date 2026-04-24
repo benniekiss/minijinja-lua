@@ -45,8 +45,8 @@ use crate::{
     state::bind_lua,
 };
 
-/// A wrapper around a `minijinja::Environment`. This wrapper can be serialized into
-/// an `mlua::UserData` object for use within Lua.
+/// A wrapper around a [`minijinja::Environment`]. This wrapper can be serialized into
+/// an [`mlua::UserData`] object for use within Lua.
 #[derive(Debug)]
 pub struct LuaEnvironment {
     env: RwLock<Environment<'static>>,
@@ -98,7 +98,7 @@ impl LuaEnvironment {
             .map_err(|_| LuaError::runtime("environment lock poisoned"))
     }
 
-    /// Get a write lock on the underlying `minijinja::Environment`
+    /// Get a write lock on the underlying [`minijinja::Environment`]
     pub(crate) fn write_env(&self) -> Result<RwLockWriteGuard<'_, Environment<'static>>, LuaError> {
         self.env
             .write()
@@ -330,7 +330,7 @@ impl LuaUserData for LuaEnvironment {
                     let source = func.with_func(args!(name), None)?;
                     Ok(source.and_then(|v| {
                         // If the lua function returns nil, i.e., no path found
-                        // it is mapped as `minijinja::value::Undefined`, however
+                        // it is mapped as `minijinja::value::ValueKind::Undefined`, however
                         // we need to return a `None` to indicate no path was found.
                         if v.is_undefined() {
                             None

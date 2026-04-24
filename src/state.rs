@@ -23,9 +23,9 @@ thread_local! {
     static CURRENT_LUA: AtomicPtr<Lua> = const { AtomicPtr::new(std::ptr::null_mut()) };
 }
 
-/// A `mlua::UserData` wrapper around a `minijinja::State`. This is passed to
+/// A [`mlua::UserData`] wrapper around a [`minijinja::State`]. This is passed to
 /// filters and other callbacks in the Jinja environment. It can only be
-/// initialized within an `mlua::Lua::scope` callback, as it is not `'static`
+/// initialized within an [`mlua::Lua::scope`] callback, as it is not `'static`
 #[derive(Debug)]
 pub(crate) struct JinjaState<'scope> {
     state: &'scope minijinja::State<'scope, 'scope>,
@@ -212,7 +212,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
                 } else {
                     Err(LuaError::ToLuaConversionError {
                         from: val.type_name().to_string(),
-                        to: "minijinja::value::Value",
+                        to: "minijinja::Value",
                         message: None,
                     })
                 }
@@ -237,7 +237,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
                         } else {
                             return Err(LuaError::ToLuaConversionError {
                                 from: val.type_name().to_string(),
-                                to: "minijinja::value::Value",
+                                to: "minijinja::Value",
                                 message: None,
                             });
                         }
@@ -250,7 +250,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
     }
 }
 
-/// Allow access to a `mlua::Lua` instance across a `Send + Sync` boundary in module mode.
+/// Allow access to a [`mlua::Lua`] instance across a `Send + Sync` boundary in module mode.
 ///
 /// This code mirrors the [`minijinja-py`](https://github.com/mitsuhiko/minijinja/blob/29ac0b2936eacf83ebf781c52f4f4ffc3add4c52/minijinja-py/src/state.rs) implementation.
 pub(crate) fn with_lua<R, F: FnOnce(&Lua) -> Result<R, LuaError>>(f: F) -> Result<R, LuaError> {
