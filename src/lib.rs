@@ -7,7 +7,7 @@ mod state;
 
 use mlua::prelude::{Lua, LuaFunction, LuaResult, LuaTable, LuaValue};
 
-pub use crate::environment::LuaEnvironment;
+pub use crate::{environment::LuaEnvironment, state::LuaState};
 
 /// Builds and returns the `minijinja` lua table.
 ///

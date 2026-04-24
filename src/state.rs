@@ -27,7 +27,7 @@ thread_local! {
 /// filters and other callbacks in the Jinja environment. It can only be
 /// initialized within an [`mlua::Lua::scope`] callback, as it is not `'static`
 #[derive(Debug)]
-pub(crate) struct LuaState<'scope> {
+pub struct LuaState<'scope> {
     state: &'scope minijinja::State<'scope, 'scope>,
 }
 
