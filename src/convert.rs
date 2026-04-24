@@ -17,6 +17,7 @@ use minijinja::{
     syntax::SyntaxConfig,
     value::{
         Enumerator,
+        Kwargs,
         Object as JinjaObject,
         ObjectRepr as JinjaObjectRepr,
         Value as JinjaValue,
@@ -36,6 +37,7 @@ use mlua::{
         LuaRegistryKey,
         LuaTable,
         LuaValue,
+        LuaVariadic,
     },
 };
 
@@ -85,7 +87,7 @@ impl LuaFunctionObject {
         state: Option<&minijinja::State>,
     ) -> Result<Option<JinjaValue>, JinjaError> {
         self.with(|lua, func: LuaFunction| {
-            let mut mv = minijinja_args_to_lua(lua, args)?;
+            let mut mv = minijinja_args_to_lua(lua, args);
 
             // Using `Lua::Scope` here allows passing the `minijinja::State` to the callback. Since
             // `minijinja::State` is not `'static`, this enables passing a temporarily created
@@ -257,7 +259,7 @@ impl JinjaObject for LuaTableObject {
         args: &[JinjaValue],
     ) -> Result<JinjaValue, minijinja::Error> {
         self.with(|lua, table: LuaTable| {
-            let mut mv = minijinja_args_to_lua(lua, args)?;
+            let mut mv = minijinja_args_to_lua(lua, args);
 
             lua.scope(move |scope| {
                 if self.pass_state() {
@@ -279,7 +281,7 @@ impl JinjaObject for LuaTableObject {
         args: &[JinjaValue],
     ) -> Result<JinjaValue, JinjaError> {
         self.with(|lua, table: LuaTable| {
-            let mut mv = minijinja_args_to_lua(lua, args)?;
+            let mut mv = minijinja_args_to_lua(lua, args);
 
             lua.scope(move |scope| {
                 if self.pass_state() {
@@ -446,7 +448,7 @@ impl JinjaObject for LuaUserDataObject {
         args: &[JinjaValue],
     ) -> Result<JinjaValue, minijinja::Error> {
         self.with(|lua, userdata: LuaAnyUserData| {
-            let mut mv = minijinja_args_to_lua(lua, args)?;
+            let mut mv = minijinja_args_to_lua(lua, args);
 
             lua.scope(move |scope| {
                 if self.pass_state() {
@@ -468,7 +470,7 @@ impl JinjaObject for LuaUserDataObject {
         args: &[JinjaValue],
     ) -> Result<JinjaValue, JinjaError> {
         self.with(|lua, userdata: LuaAnyUserData| {
-            let mut mv = minijinja_args_to_lua(lua, args)?;
+            let mut mv = minijinja_args_to_lua(lua, args);
 
             lua.scope(move |scope| {
                 if self.pass_state() {
@@ -600,17 +602,53 @@ pub(crate) fn minijinja_to_lua(lua: &Lua, value: &JinjaValue) -> Option<LuaValue
 ///
 /// This is used to convert arguments passed to minijinja filters, tests, and
 /// functions into lua arguments to be handled by the registered lua callbacks.
-pub(crate) fn minijinja_args_to_lua(
-    lua: &Lua,
-    args: &[JinjaValue],
-) -> Result<LuaMultiValue, LuaError> {
-    let mut mv = LuaMultiValue::new();
-    for v in args {
-        let val = minijinja_to_lua(lua, v).unwrap_or(LuaValue::Nil);
-        mv.push_back(val);
-    }
+pub(crate) fn minijinja_args_to_lua(lua: &Lua, args: &[JinjaValue]) -> LuaMultiValue {
+    LuaMultiValue::from_iter(
+        args.iter()
+            .map(|v| minijinja_to_lua(lua, v).unwrap_or(LuaValue::Nil)),
+    )
+}
 
-    Ok(mv)
+/// Convert `mlua::Variadic` arguments into a `Vec<minijinja::Value>`
+///
+/// If `accept_kwargs` is `true`, special handling is applied to the last argument if it is an
+/// `mlua::Table` by converting it to `minijinja::value::Kwargs`.
+///
+/// This is currently only used in the `State` methods `apply_filter`, `perform_test`, and
+/// `call_macro` to pass keyword arguments to those callbacks.
+pub(crate) fn lua_args_to_minijinja(
+    lua: &Lua,
+    mut args: LuaVariadic<LuaValue>,
+    accept_kwargs: bool,
+) -> Vec<JinjaValue> {
+    let kwargs = args.pop_if(|v| accept_kwargs && v.is_table()).map(|v| {
+        v.as_table()
+            .map(|tbl| {
+                JinjaValue::from(Kwargs::from_iter(
+                    tbl.pairs::<LuaValue, LuaValue>().filter_map(|pair| {
+                        let (k, v) = pair.ok()?;
+
+                        let key = k.to_string().ok()?;
+                        let value = lua_to_minijinja(lua, &v)?;
+
+                        Some((key, value))
+                    }),
+                ))
+            })
+            // If for some reason `.as_table()` fails, follow through with a regular conversion.
+            .unwrap_or_else(|| lua_to_minijinja(lua, &v).unwrap_or(JinjaValue::UNDEFINED))
+    });
+
+    let mut args = args
+        .iter()
+        .map(|v| lua_to_minijinja(lua, v).unwrap_or(JinjaValue::UNDEFINED))
+        .collect::<Vec<JinjaValue>>();
+
+    if let Some(kw) = kwargs {
+        args.push(kw)
+    };
+
+    args
 }
 
 /// Convert an `mlua::Error` error into the specified `minijinja::Error`
@@ -918,6 +956,76 @@ mod tests {
 
         let value = minijinja_to_lua(&lua, &jinja).unwrap();
         assert!(value.is_userdata());
+    }
+
+    #[test]
+    fn test_lua_minijinja_roundtrip_kwargs() {
+        let lua = setup();
+        let table = lua.create_table().unwrap();
+        table.set("foo", "bar").unwrap();
+
+        let args: LuaVariadic<LuaValue> = LuaVariadic::from_iter(vec![
+            LuaValue::Integer(1),
+            LuaValue::Integer(2),
+            LuaValue::Table(table),
+        ]);
+
+        let jinja = lua_args_to_minijinja(&lua, args, true);
+        assert!(jinja.last().unwrap().is_kwargs());
+        assert_eq!(
+            jinja.last().unwrap().get_attr("foo").unwrap().to_string(),
+            "bar"
+        );
+
+        let value = minijinja_args_to_lua(&lua, &jinja);
+        assert!(value.iter().last().unwrap().is_table());
+        assert_eq!(
+            value
+                .iter()
+                .last()
+                .unwrap()
+                .as_table()
+                .unwrap()
+                .get::<String>("foo")
+                .unwrap(),
+            "bar"
+        );
+    }
+
+    #[test]
+    fn test_lua_minijinja_roundtrip_no_kwargs() {
+        let lua = setup();
+        let table = lua.create_table().unwrap();
+        table.set("foo", "bar").unwrap();
+
+        let args: LuaVariadic<LuaValue> = LuaVariadic::from_iter(vec![
+            LuaValue::Integer(1),
+            LuaValue::Integer(2),
+            LuaValue::Table(table),
+        ]);
+
+        let jinja = lua_args_to_minijinja(&lua, args, false);
+        assert!(
+            jinja
+                .last()
+                .unwrap()
+                .downcast_object_ref::<LuaTableObject>()
+                .is_some()
+        );
+
+        let value = minijinja_args_to_lua(&lua, &jinja);
+        assert!(value.iter().last().unwrap().is_table());
+        assert_eq!(
+            value
+                .iter()
+                .last()
+                .unwrap()
+                .as_table()
+                .unwrap()
+                .get::<String>("foo")
+                .unwrap(),
+            "bar"
+        );
     }
 
     // AUTO ESCAPE CONVERSION TESTS //

@@ -13,6 +13,7 @@ use mlua::{
 
 use crate::convert::{
     auto_escape_to_lua,
+    lua_args_to_minijinja,
     lua_to_minijinja,
     minijinja_to_lua,
     undefined_behavior_to_lua,
@@ -101,10 +102,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
              this: &JinjaState<'scope>,
              (name, args): (String, LuaVariadic<LuaValue>)|
              -> Result<String, LuaError> {
-                let args: Vec<JinjaValue> = args
-                    .into_iter()
-                    .map(|v| lua_to_minijinja(lua, &v).unwrap_or(JinjaValue::UNDEFINED))
-                    .collect();
+                let args: Vec<JinjaValue> = lua_args_to_minijinja(lua, args, true);
 
                 this.state
                     .call_macro(&name, &args)
@@ -138,10 +136,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
              this: &JinjaState<'scope>,
              (filter, args): (String, LuaVariadic<LuaValue>)|
              -> Result<Option<LuaValue>, LuaError> {
-                let args: Vec<JinjaValue> = args
-                    .into_iter()
-                    .map(|v| lua_to_minijinja(lua, &v).unwrap_or(JinjaValue::UNDEFINED))
-                    .collect();
+                let args: Vec<JinjaValue> = lua_args_to_minijinja(lua, args, true);
 
                 // Since the context may contain dynamic objects, convert the returned value
                 // through the custom layer before returning.
@@ -159,10 +154,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
              this: &JinjaState<'scope>,
              (test, args): (String, LuaVariadic<LuaValue>)|
              -> Result<bool, LuaError> {
-                let args: Vec<JinjaValue> = args
-                    .into_iter()
-                    .map(|v| lua_to_minijinja(lua, &v).unwrap_or(JinjaValue::UNDEFINED))
-                    .collect();
+                let args: Vec<JinjaValue> = lua_args_to_minijinja(lua, args, true);
 
                 this.state
                     .perform_test(&test, &args)
