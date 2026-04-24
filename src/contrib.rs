@@ -196,7 +196,7 @@ mod test {
     use serde_json::json;
 
     use super::*;
-    use crate::state::JinjaState;
+    use crate::state::LuaState;
 
     fn setup() -> Lua {
         Lua::new()
@@ -220,7 +220,7 @@ mod test {
         let state = env.empty_state();
 
         lua.scope(|scope| {
-            let ud = scope.create_userdata(JinjaState::new(&state)).unwrap();
+            let ud = scope.create_userdata(LuaState::new(&state)).unwrap();
             assert_eq!(minijinja_types(&LuaValue::UserData(ud)).unwrap(), "state");
             Ok(())
         })

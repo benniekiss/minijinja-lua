@@ -41,7 +41,7 @@ use mlua::{
     },
 };
 
-use crate::state::{JinjaState, with_lua};
+use crate::state::{LuaState, with_lua};
 
 pub(crate) trait LuaObject {
     /// Create a new wrapper around the [`mlua::Value`] associated with `key`
@@ -99,7 +99,7 @@ impl LuaFunctionObject {
                 if let Some(st) = state
                     && self.pass_state()
                 {
-                    let userdate = scope.create_userdata(JinjaState::new(st))?;
+                    let userdate = scope.create_userdata(LuaState::new(st))?;
                     mv.push_front(LuaValue::UserData(userdate.clone()));
                 };
 
@@ -263,7 +263,7 @@ impl JinjaObject for LuaTableObject {
 
             lua.scope(move |scope| {
                 if self.pass_state() {
-                    let userdate = scope.create_userdata(JinjaState::new(state))?;
+                    let userdate = scope.create_userdata(LuaState::new(state))?;
                     mv.push_front(LuaValue::UserData(userdate.clone()));
                 };
 
@@ -285,7 +285,7 @@ impl JinjaObject for LuaTableObject {
 
             lua.scope(move |scope| {
                 if self.pass_state() {
-                    let userdate = scope.create_userdata(JinjaState::new(state))?;
+                    let userdate = scope.create_userdata(LuaState::new(state))?;
                     mv.push_front(LuaValue::UserData(userdate.clone()));
                 };
 
@@ -452,7 +452,7 @@ impl JinjaObject for LuaUserDataObject {
 
             lua.scope(move |scope| {
                 if self.pass_state() {
-                    let ud = scope.create_userdata(JinjaState::new(state))?;
+                    let ud = scope.create_userdata(LuaState::new(state))?;
                     mv.push_front(LuaValue::UserData(ud.clone()));
                 };
 
@@ -474,7 +474,7 @@ impl JinjaObject for LuaUserDataObject {
 
             lua.scope(move |scope| {
                 if self.pass_state() {
-                    let ud = scope.create_userdata(JinjaState::new(state))?;
+                    let ud = scope.create_userdata(LuaState::new(state))?;
                     mv.push_front(LuaValue::UserData(ud.clone()));
                 };
 
@@ -614,7 +614,7 @@ pub(crate) fn minijinja_args_to_lua(lua: &Lua, args: &[JinjaValue]) -> LuaMultiV
 /// If `accept_kwargs` is `true`, special handling is applied to the last argument if it is an
 /// [`mlua::Table`] by converting it to [`minijinja::value::Kwargs`].
 ///
-/// This is currently only used in the [`JinjaState`] methods `apply_filter()`, `perform_test()`,
+/// This is currently only used in the [`LuaState`] methods `apply_filter()`, `perform_test()`,
 /// and `call_macro()` to pass keyword arguments to those callbacks.
 pub(crate) fn lua_args_to_minijinja(
     lua: &Lua,

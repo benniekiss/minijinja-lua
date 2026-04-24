@@ -27,24 +27,24 @@ thread_local! {
 /// filters and other callbacks in the Jinja environment. It can only be
 /// initialized within an [`mlua::Lua::scope`] callback, as it is not `'static`
 #[derive(Debug)]
-pub(crate) struct JinjaState<'scope> {
+pub(crate) struct LuaState<'scope> {
     state: &'scope minijinja::State<'scope, 'scope>,
 }
 
-impl<'scope> JinjaState<'scope> {
+impl<'scope> LuaState<'scope> {
     /// Get a new state
     pub(crate) fn new(state: &'scope minijinja::State<'scope, 'scope>) -> Self {
         Self { state }
     }
 }
 
-impl<'scope> fmt::Display for JinjaState<'scope> {
+impl<'scope> fmt::Display for LuaState<'scope> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "State")
     }
 }
 
-impl<'scope> LuaUserData for JinjaState<'scope> {
+impl<'scope> LuaUserData for LuaState<'scope> {
     fn add_fields<F: mlua::UserDataFields<Self>>(fields: &mut F) {
         fields.add_meta_field("__name", "state");
     }
@@ -53,7 +53,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         // The name of the current template
         methods.add_method(
             "name",
-            |_, this: &JinjaState<'scope>, _: LuaValue| -> Result<String, _> {
+            |_, this: &LuaState<'scope>, _: LuaValue| -> Result<String, _> {
                 Ok(this.state.name().to_string())
             },
         );
@@ -61,7 +61,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         // The current auto escape flag
         methods.add_method(
             "auto_escape",
-            |_, this: &JinjaState<'scope>, _: LuaValue| -> Result<Option<String>, _> {
+            |_, this: &LuaState<'scope>, _: LuaValue| -> Result<Option<String>, _> {
                 Ok(auto_escape_to_lua(this.state.auto_escape()))
             },
         );
@@ -69,7 +69,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         // The current undefined behavior
         methods.add_method(
             "undefined_behavior",
-            |_, this: &JinjaState<'scope>, _: LuaValue| -> Result<Option<String>, _> {
+            |_, this: &LuaState<'scope>, _: LuaValue| -> Result<Option<String>, _> {
                 Ok(undefined_behavior_to_lua(this.state.undefined_behavior()))
             },
         );
@@ -77,7 +77,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         // The name of the current block
         methods.add_method(
             "current_block",
-            |_, this: &JinjaState<'scope>, _: LuaValue| -> Result<Option<&str>, _> {
+            |_, this: &LuaState<'scope>, _: LuaValue| -> Result<Option<&str>, _> {
                 Ok(this.state.current_block())
             },
         );
@@ -85,7 +85,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         // Lookup a value by key in the current context
         methods.add_method(
             "lookup",
-            |lua: &Lua, this: &JinjaState<'scope>, name: String| -> Result<Option<LuaValue>, _> {
+            |lua: &Lua, this: &LuaState<'scope>, name: String| -> Result<Option<LuaValue>, _> {
                 // Since the context may contain dynamic objects, convert the returned value
                 // through the custom layer before returning.
                 Ok(this
@@ -99,7 +99,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         methods.add_method(
             "call_macro",
             |lua: &Lua,
-             this: &JinjaState<'scope>,
+             this: &LuaState<'scope>,
              (name, args): (String, LuaVariadic<LuaValue>)|
              -> Result<String, LuaError> {
                 let args: Vec<JinjaValue> = lua_args_to_minijinja(lua, args, true);
@@ -113,7 +113,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         // A list of exported variables
         methods.add_method(
             "exports",
-            |_, this: &JinjaState<'scope>, _: LuaValue| -> Result<Vec<&str>, _> {
+            |_, this: &LuaState<'scope>, _: LuaValue| -> Result<Vec<&str>, _> {
                 Ok(this.state.exports())
             },
         );
@@ -122,7 +122,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         methods.add_method(
             "known_variables",
             |_,
-             this: &JinjaState<'scope>,
+             this: &LuaState<'scope>,
              _: LuaValue|
              -> Result<Vec<std::borrow::Cow<'_, str>>, _> {
                 Ok(this.state.known_variables())
@@ -133,7 +133,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         methods.add_method(
             "apply_filter",
             |lua: &Lua,
-             this: &JinjaState<'scope>,
+             this: &LuaState<'scope>,
              (filter, args): (String, LuaVariadic<LuaValue>)|
              -> Result<Option<LuaValue>, LuaError> {
                 let args: Vec<JinjaValue> = lua_args_to_minijinja(lua, args, true);
@@ -151,7 +151,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         methods.add_method(
             "perform_test",
             |lua: &Lua,
-             this: &JinjaState<'scope>,
+             this: &LuaState<'scope>,
              (test, args): (String, LuaVariadic<LuaValue>)|
              -> Result<bool, LuaError> {
                 let args: Vec<JinjaValue> = lua_args_to_minijinja(lua, args, true);
@@ -165,7 +165,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         // Format a value to a string
         methods.add_method(
             "format",
-            |lua: &Lua, this: &JinjaState<'scope>, val: LuaValue| -> Result<String, LuaError> {
+            |lua: &Lua, this: &LuaState<'scope>, val: LuaValue| -> Result<String, LuaError> {
                 let val = lua_to_minijinja(lua, &val).unwrap_or(JinjaValue::UNDEFINED);
 
                 this.state.format(val).map_err(LuaError::external)
@@ -175,7 +175,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         // A tuple of the current and remaining fuel usage
         methods.add_method(
             "fuel_levels",
-            |lua: &Lua, this: &JinjaState<'scope>, _: LuaValue| -> Result<LuaValue, _> {
+            |lua: &Lua, this: &LuaState<'scope>, _: LuaValue| -> Result<LuaValue, _> {
                 lua.to_value(&this.state.fuel_levels())
             },
         );
@@ -185,7 +185,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         methods.add_method(
             "get_temp",
             |lua: &Lua,
-             this: &JinjaState<'scope>,
+             this: &LuaState<'scope>,
              name: String|
              -> Result<Option<LuaValue>, LuaError> {
                 // Since the context may contain dynamic objects, convert the returned value
@@ -201,7 +201,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         methods.add_method(
             "set_temp",
             |lua: &Lua,
-             this: &JinjaState<'scope>,
+             this: &LuaState<'scope>,
              (name, val): (String, LuaValue)|
              -> Result<Option<LuaValue>, LuaError> {
                 if let Some(val) = lua_to_minijinja(lua, &val) {
@@ -223,7 +223,7 @@ impl<'scope> LuaUserData for JinjaState<'scope> {
         methods.add_method(
             "get_or_set_temp",
             |lua: &Lua,
-             this: &JinjaState<'scope>,
+             this: &LuaState<'scope>,
              (name, func): (String, LuaFunction)|
              -> Result<Option<LuaValue>, LuaError> {
                 let val = match this.state.get_temp(&name) {
