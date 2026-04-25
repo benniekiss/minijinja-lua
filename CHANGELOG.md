@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.17](https://github.com/benniekiss/minijinja-lua/compare/v0.1.16...v0.1.17) - 2026-04-25
+
+### Added
+
+- support `Kwargs` in lua
+
+### Other
+
+- update lock
+- update lua API documentation
+- make `LuaState` public
+- change `JinjaState` to `LuaState`
+- cleanup doc comments with better links
+
 ## [0.1.16](https://github.com/benniekiss/minijinja-lua/compare/v0.1.15...v0.1.16) - 2026-04-23
 
 ### Added
