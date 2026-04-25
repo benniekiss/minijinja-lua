@@ -22,6 +22,9 @@ copy_directories = ["library"]
 [build.modules]
 "minijinja" = "minijinja_lua"
 
+[build.include]
+"library/minijinja.d.lua" = "minijinja.d.lua"
+
 [test]
 type = "busted"
 
