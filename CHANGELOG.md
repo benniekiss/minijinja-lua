@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.19](https://github.com/benniekiss/minijinja-lua/compare/v0.1.18...v0.1.19) - 2026-05-04
+
+### Other
+
+- add SPDX header
+- *(deps)* update renovatebot/github-action action to v46.1.13 ([#37](https://github.com/benniekiss/minijinja-lua/pull/37))
+- *(deps)* update renovatebot/github-action action to v46.1.12 ([#34](https://github.com/benniekiss/minijinja-lua/pull/34))
+- *(deps)* update j178/prek-action digest to 6ad8027 ([#35](https://github.com/benniekiss/minijinja-lua/pull/35))
+- remove artifact prefix
+- add file extension to license
+- migrate to editorconfig
+
 ## [0.1.18](https://github.com/benniekiss/minijinja-lua/compare/v0.1.17...v0.1.18) - 2026-04-25
 
 ### Added
