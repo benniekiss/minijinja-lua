@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 use mlua::prelude::{Lua, LuaError, LuaFunction, LuaValue};
 
 use crate::LuaEnvironment;
