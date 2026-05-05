@@ -21,6 +21,7 @@ cargo install minijinja-lua --no-default-features --features module,lua{version}
 Prebuilt binaries:
 
 ```shell
+lx --extra-servers https://benniekiss.github.io/rocks/ install minijinja-lua
 ```
 
 Compile from source:
