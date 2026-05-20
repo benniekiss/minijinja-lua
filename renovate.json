@@ -47,7 +47,7 @@
             "rangeStrategy": "pin"
         }
     ],
-    "constraints": {
-        "rust": "nightly"
+    "env": {
+        "RUST_VERSION": "nightly"
     }
 }
