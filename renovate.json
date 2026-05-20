@@ -47,7 +47,10 @@
             "rangeStrategy": "pin"
         }
     ],
-    "env": {
-        "RUST_VERSION": "nightly"
+    "constraints": {
+        "rust": "nightly"
+    },
+    "constraintsVersioning": {
+        "rust": "rust-release-channel"
     }
 }

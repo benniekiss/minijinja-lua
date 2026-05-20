@@ -33,6 +33,5 @@ jobs:
         env:
           LOG_LEVEL: ${{ inputs.logLevel }}
           RENOVATE_REPOSITORIES: ${{ github.repository }}
-          RENOVATE_ALLOWED_ENV: "[\"RUST_VERSION\"]"
         with:
           token: ${{ steps.generate-token.outputs.token }}
