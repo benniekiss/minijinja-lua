@@ -38,9 +38,16 @@
     ],
     "packageRules": [
         {
-            "matchManagers": ["custom.regex"],
-            "matchPackageNames": ["rust"],
+            "matchManagers": [
+                "custom.regex"
+            ],
+            "matchPackageNames": [
+                "rust"
+            ],
             "rangeStrategy": "pin"
         }
-    ]
+    ],
+    "env": {
+        "TOOL_VERSION": "nightly"
+    }
 }
