@@ -10,7 +10,8 @@
     "enabledManagers": [
         "github-actions",
         "cargo",
-        "pip_requirements"
+        "pip_requirements",
+        "rust-toolchain"
     ],
     "pip_requirements": {
         "rangeStrategy": "pin"
@@ -20,37 +21,5 @@
         "schedule": [
             "before 12pm on monday"
         ]
-    },
-    "customManagers": [
-        {
-            "customType": "regex",
-            "managerFilePatterns": [
-                "/(^|/)rust-toolchain\\.toml?$/"
-            ],
-            "matchStrings": [
-                "channel\\s*=\\s*\"(?<currentValue>[^\"]+)\""
-            ],
-            "depNameTemplate": "rust",
-            "packageNameTemplate": "rust-lang/rust",
-            "datasourceTemplate": "github-releases",
-            "versioningTemplate": "rust-release-channel"
-        }
-    ],
-    "packageRules": [
-        {
-            "matchManagers": [
-                "custom.regex"
-            ],
-            "matchPackageNames": [
-                "rust"
-            ],
-            "rangeStrategy": "pin"
-        }
-    ],
-    "constraints": {
-        "rust": "nightly"
-    },
-    "constraintsVersioning": {
-        "rust": "rust-release-channel"
     }
 }
