@@ -40,6 +40,7 @@ jobs:
 
       - name: Run tests
         run: |
+          lx --lua-version ${{ vars.LUA_VERSION }} install-lua
           lx --lua-version ${{ matrix.lua_version }} test
 
   cargo-test:
