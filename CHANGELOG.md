@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.21](https://github.com/benniekiss/minijinja-lua/compare/v0.1.20...v0.1.21) - 2026-05-21
+
+### Fixed
+
+- install readline headers
+- package name
+- run as root
+- try installing readline headers
+- revert installing lua
+- try installing lua first
+
+### Other
+
+- update lux.lock
+
 ## [0.1.20](https://github.com/benniekiss/minijinja-lua/compare/v0.1.19...v0.1.20) - 2026-05-21
 
 ### Fixed
