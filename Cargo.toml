@@ -1,4 +1,4 @@
-cargo-features = ["profile-rustflags"]
+# cargo-features = ["profile-rustflags"]
 
 [package]
 name = "minijinja-lua"
@@ -60,4 +60,4 @@ opt-level = "z"
 lto = true
 panic = "abort"
 codegen-units = 1
-rustflags = ["-Zlocation-detail=none", "-Zfmt-debug=none"]
+# rustflags = ["-Zlocation-detail=none", "-Zfmt-debug=none"]
