@@ -21,5 +21,16 @@
         "schedule": [
             "before 12pm on monday"
         ]
-    }
+    },
+    "packageRules": [
+        {
+            "matchManagers": [
+                "rust-toolchain"
+            ],
+            "matchDepTypes": [
+                "toolchain"
+            ],
+            "rangeStrategy": "pin"
+        }
+    ]
 }
