@@ -22,7 +22,6 @@ jobs:
 
       - name: Sync project
         run: |
-          lx --lua-version ${{ vars.LUA_VERSION }} install-lua
           lx --lua-version ${{ vars.LUA_VERSION }} sync
 
       - name: Run prek
