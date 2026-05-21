@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.20](https://github.com/benniekiss/minijinja-lua/compare/v0.1.19...v0.1.20) - 2026-05-21
+
+### Fixed
+
+- -Z flags cannot be used in build scripts
+- copy-paste error
+- move rustflags to build.rs to address renovate issues
+- try changing the versioning schema
+- maybe its {TOOL}_VERSION, not TOOL_VERSION
+- use renovate `constraints`
+
+### Other
+
+- update cargo.lock
+- *(deps)* pin rust to nightly-2026-05-20 ([#51](https://github.com/benniekiss/minijinja-lua/pull/51))
+- pin nightly version
+- *(deps)* update rust crate minijinja-contrib to v2.20.0 ([#50](https://github.com/benniekiss/minijinja-lua/pull/50))
+- *(deps)* update rust crate minijinja to v2.20.0 ([#49](https://github.com/benniekiss/minijinja-lua/pull/49))
+- *(deps)* update rust crate jiff to v0.2.24 ([#48](https://github.com/benniekiss/minijinja-lua/pull/48))
+- use new rust-toolchain manager
+- set TOOL_VERSION for renovate run
+- try using nightly toolchain
+- *(deps)* update j178/prek-action digest to bdca6f1 ([#46](https://github.com/benniekiss/minijinja-lua/pull/46))
+- *(deps)* update dependency sphinx_lua_ls to v3.12.0 ([#44](https://github.com/benniekiss/minijinja-lua/pull/44))
+- *(deps)* update dependency myst_parser to v5.1.0 ([#43](https://github.com/benniekiss/minijinja-lua/pull/43))
+- *(deps)* update renovatebot/github-action action to v46.1.14 ([#42](https://github.com/benniekiss/minijinja-lua/pull/42))
+- *(deps)* update release-plz/action digest to 064f4d1 ([#41](https://github.com/benniekiss/minijinja-lua/pull/41))
+- *(deps)* update actions/create-github-app-token digest to bcd2ba4 ([#40](https://github.com/benniekiss/minijinja-lua/pull/40))
+- *(deps)* update actions-rust-lang/setup-rust-toolchain digest to 46268bd ([#39](https://github.com/benniekiss/minijinja-lua/pull/39))
+- add prebuilt rock install directions
+
 ## [0.1.19](https://github.com/benniekiss/minijinja-lua/compare/v0.1.18...v0.1.19) - 2026-05-04
 
 ### Other
