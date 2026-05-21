@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: install readline headers
-        run: apt-get -y update && apt-get -y install libreadline-devel
+        run: sudo apt-get -y update && sudo apt-get -y install libreadline-devel
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
