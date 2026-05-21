@@ -31,6 +31,9 @@ jobs:
           # - 5.5
 
     steps:
+      - name: install readline headers
+        run: apt-get -y update && apt-get -y install libreadline-devel
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Lux
