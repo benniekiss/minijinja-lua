@@ -1,4 +1,4 @@
-cargo-features = ["profile-rustflags"]
+cargo-features = ["profile-rustflags", "panic-immediate-abort"]
 
 [package]
 name = "minijinja-lua"
@@ -58,6 +58,9 @@ serde_json = { version = "1.0.149", features = [
 strip = true
 opt-level = "z"
 lto = true
-panic = "abort"
+panic = "immediate-abort"
 codegen-units = 1
-rustflags = ["-Zlocation-detail=none", "-Zfmt-debug=none"]
+rustflags = [
+    "-Zlocation-detail=none",
+    "-Zfmt-debug=none",
+]
