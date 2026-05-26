@@ -34,4 +34,5 @@ jobs:
           LOG_LEVEL: ${{ inputs.logLevel }}
           RENOVATE_REPOSITORIES: ${{ github.repository }}
         with:
+          docker-cmd-file: .github/renovate-entrypoint.sh
           token: ${{ steps.generate-token.outputs.token }}
