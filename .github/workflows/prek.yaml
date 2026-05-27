@@ -25,9 +25,7 @@ jobs:
 
       - name: Sync project
         run: |
-          lx --lua-version ${{ vars.LUA_VERSION }} sync
+          lx --no-luarc --lua-version ${{ vars.LUA_VERSION }} sync
 
       - name: Run prek
         uses: j178/prek-action@bdca6f102f98e2b4c7029491a53dfd366469e33d # v2
-        with:
-          cache: false
