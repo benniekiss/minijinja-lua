@@ -1,23 +1,21 @@
 local minijinja = require("minijinja")
 local Environment = minijinja.Environment
 
-describe("Environment tests", function()
-    describe("expressions#Environment", function()
-        it("basic#expressions", function()
+describe("Environment tests", function ()
+    describe("expressions#Environment", function ()
+        it("basic#expressions", function ()
             local env = Environment:new()
 
             local rv = env:eval("1 + b", { b = 42 })
             assert.Equal(43, rv)
         end)
 
-        it("globals#expressions", function()
+        it("globals#expressions", function ()
             local env = Environment:new()
             local rv
 
             env:add_global("life", 42)
-            env:add_global("hello", function()
-                return "hello world"
-            end)
+            env:add_global("hello", function () return "hello world" end)
 
             rv = env:eval("life")
             assert.Equal(42, rv)
@@ -26,18 +24,16 @@ describe("Environment tests", function()
             assert.Equal("hello world", rv)
         end)
 
-        it("callable#expressions", function()
+        it("callable#expressions", function ()
             local env = Environment:new()
 
-            local magic = function()
-                return { 1, 2, 3 }
-            end
+            local magic = function () return { 1, 2, 3 } end
 
             local rv = env:eval("x()", { x = magic })
             assert.Same({ 1, 2, 3 }, rv)
         end)
 
-        it("callable object#expressions", function()
+        it("callable object#expressions", function ()
             local env = Environment:new()
 
             local foo = {}
@@ -50,7 +46,7 @@ describe("Environment tests", function()
             assert.Same({ 1, 2, 3 }, rv)
         end)
 
-        it("methods#expressions", function()
+        it("methods#expressions", function ()
             local env = Environment:new()
 
             local foo = {}
@@ -62,7 +58,7 @@ describe("Environment tests", function()
             assert.Equal("bar", rv)
         end)
 
-        it("attribute#expressions", function()
+        it("attribute#expressions", function ()
             local env = Environment:new()
 
             local foo = {}
@@ -72,7 +68,7 @@ describe("Environment tests", function()
             assert.Equal(99, rv)
         end)
 
-        it("nested attribute#expressions", function()
+        it("nested attribute#expressions", function ()
             local env = Environment:new()
 
             local foo = {}
@@ -87,7 +83,7 @@ describe("Environment tests", function()
             assert.Equal("bar", rv)
         end)
 
-        it("undefined attribute#expressions", function()
+        it("undefined attribute#expressions", function ()
             local env = Environment:new()
 
             local foo = {}
@@ -96,7 +92,7 @@ describe("Environment tests", function()
             assert.Nil(rv)
         end)
 
-        it("index array#expressions", function()
+        it("index array#expressions", function ()
             local env = Environment:new()
             local rv
 
@@ -123,7 +119,7 @@ describe("Environment tests", function()
             assert.Equal(3, rv)
         end)
 
-        it("index table#expressions", function()
+        it("index table#expressions", function ()
             local env = Environment:new()
             local rv
 
@@ -150,7 +146,7 @@ describe("Environment tests", function()
             assert.Equal(3, rv)
         end)
 
-        it("types#expressions", function()
+        it("types#expressions", function ()
             local env = Environment:new()
             local x
 
@@ -185,12 +181,10 @@ describe("Environment tests", function()
             assert.Equal(x, env:eval("x", { x = x }))
         end)
 
-        it("filters#expressions", function()
+        it("filters#expressions", function ()
             local env = Environment:new()
 
-            local filter = function(_, val)
-                return val:upper()
-            end
+            local filter = function (_, val) return val:upper() end
 
             env:add_filter("lua", filter)
 
@@ -198,12 +192,10 @@ describe("Environment tests", function()
             assert.Equal("HELLO", rv)
         end)
 
-        it("tests#expressions", function()
+        it("tests#expressions", function ()
             local env = Environment:new()
 
-            local test = function(_, val)
-                return val == "lua"
-            end
+            local test = function (_, val) return val == "lua" end
             env:add_test("lua", test)
 
             assert.True(env:eval("'lua' is lua"))
@@ -211,8 +203,8 @@ describe("Environment tests", function()
         end)
     end)
 
-    describe("templates#Environment", function()
-        it("custom-syntax#templates", function()
+    describe("templates#Environment", function ()
+        it("custom-syntax#templates", function ()
             local env = Environment:new()
 
             env:set_syntax({
@@ -221,12 +213,14 @@ describe("Environment tests", function()
                 comment_delimiters = { "<!--", "-->" },
             })
 
-            local rv = env:render_str("<% if true %>${ value }<% endif %><!-- nothing -->", { value = 42 })
+            local rv = env:render_str("<% if true %>${ value }<% endif %><!-- nothing -->", {
+                value = 42,
+            })
 
             assert.Equal("42", rv)
         end)
 
-        it("line-statements#templates", function()
+        it("line-statements#templates", function ()
             local env = Environment:new()
             env:set_syntax({
                 line_statement_prefix = "#",
@@ -237,7 +231,7 @@ describe("Environment tests", function()
             assert.Equal("0\n1\n2\n", rv)
         end)
 
-        it("keep-trailing-newlines#templates", function()
+        it("keep-trailing-newlines#templates", function ()
             local env = Environment:new()
             local source = "foo\n"
 
@@ -247,7 +241,7 @@ describe("Environment tests", function()
             assert.Equal("foo\n", env:render_str(source))
         end)
 
-        it("trim-blocks#templates", function()
+        it("trim-blocks#templates", function ()
             local env = Environment:new()
             local source = "{% if true %}\nfoo{% endif %}"
 
@@ -257,7 +251,7 @@ describe("Environment tests", function()
             assert.Equal("foo", env:render_str(source))
         end)
 
-        it("lstrip-blocks#templates", function()
+        it("lstrip-blocks#templates", function ()
             local env = Environment:new()
             local source = "  {% if true %}\nfoo{% endif %}"
 
@@ -267,7 +261,7 @@ describe("Environment tests", function()
             assert.Equal("\nfoo", env:render_str(source))
         end)
 
-        it("trim_and_lstrip_blocks#templates", function()
+        it("trim_and_lstrip_blocks#templates", function ()
             local env = Environment:new()
             local source = "  {% if true %}\nfoo{% endif %}"
 
@@ -278,7 +272,7 @@ describe("Environment tests", function()
             assert.Equal("foo", env:render_str(source))
         end)
 
-        it("fuel#templates", function()
+        it("fuel#templates", function ()
             local env = Environment:new()
             local source = "{% for i in ['' * 10] %}{{ i | fuel_check }}{% endfor %}"
             local fuel = 10
@@ -294,18 +288,18 @@ describe("Environment tests", function()
 
             env.fuel = fuel
             assert.Equal(fuel, env.fuel)
-            assert.Not.Error(function()
+            assert.Not.Error(function ()
                 env:render_str(source)
             end)
 
             env.fuel = fuel / 2
             assert.Equal(fuel / 2, env.fuel)
-            assert.match_error(function()
+            assert.match_error(function ()
                 env:render_str(source)
             end, "engine ran out of fuel")
         end)
 
-        it("undeclared-variables#templates", function()
+        it("undeclared-variables#templates", function ()
             local env = Environment:new()
 
             env:add_template("foo.txt", "{{ x }} {{ bar.x }}")
@@ -325,10 +319,11 @@ describe("Environment tests", function()
             assert.Same({ "x" }, env:undeclared_variables("bar.txt"))
         end)
 
-        it("loop-controls#templates", function()
+        it("loop-controls#templates", function ()
             local env = Environment:new()
 
-            local rv = env:render_str([[
+            local rv = env:render_str(
+                [[
 				{% for x in [1, 2, 3, 4, 5] %}
 				{% if x == 1 %}
 					{% continue %}
@@ -337,12 +332,13 @@ describe("Environment tests", function()
 				{% endif %}
 				{{ x }}
 				{% endfor %}
-			]])
+			]]
+            )
 
             assert.Equal("2", rv:match("^%s*(2)%s*$"))
         end)
 
-        it("iterate array#templates", function()
+        it("iterate array#templates", function ()
             local env = Environment:new()
 
             local foo = { 1, 2, 3 }
@@ -351,7 +347,7 @@ describe("Environment tests", function()
             assert.Equal("123", rv)
         end)
 
-        it("iterate table#templates", function()
+        it("iterate table#templates", function ()
             local env = Environment:new()
             local rv
 
@@ -363,13 +359,15 @@ describe("Environment tests", function()
             assert.match("two ", rv)
             assert.match("three ", rv)
 
-            rv = env:render_str("{% for k,v in foo | items %}{{ k }}: {{ v }}\n{% endfor %}", { foo = foo })
+            rv = env:render_str("{% for k,v in foo | items %}{{ k }}: {{ v }}\n{% endfor %}", {
+                foo = foo,
+            })
             assert.match("one: 1\n", rv)
             assert.match("two: 2\n", rv)
             assert.match("three: 3\n", rv)
         end)
 
-        it("sort#templates", function()
+        it("sort#templates", function ()
             local env = Environment:new()
 
             local X = {}
@@ -408,7 +406,7 @@ describe("Environment tests", function()
             assert.Equal("-1,4,23,42", rv)
         end)
 
-        it("path_loader#templates", function()
+        it("path_loader#templates", function ()
             local env = Environment:new()
             local loader = minijinja.path_loader("spec/templates")
             env:set_loader(loader)
@@ -416,29 +414,29 @@ describe("Environment tests", function()
             local rv = env:render_template("base.txt", { woot = "woot" })
             assert.Equal("I am from foo! woot!", rv)
 
-            assert.Error(function()
+            assert.Error(function ()
                 env:render_template("missing.txt")
             end)
-            assert.Error(function()
+            assert.Error(function ()
                 env:render_template("../environment_spec.lua")
             end)
         end)
 
-        it("fromjson#templates", function()
+        it("fromjson#templates", function ()
             local env = Environment:new()
 
             local te = [[{"3":1,"2":{"b":1,"c":2,"a":3},"1":3}]]
 
             -- The filter should preserve key order
-            local rv =
-                env:render_str("{% for k, v in te | fromjson | items %}{{ k }}: {{ v }} {% endfor %}", { te = te })
+            local expr = "{% for k, v in te | fromjson | items %}{{ k }}: {{ v }} {% endfor %}"
+            local rv = env:render_str(expr, { te = te })
 
             assert.Equal([[3: 1 2: {"b": 1, "c": 2, "a": 3} 1: 3 ]], rv)
         end)
     end)
 
-    describe("callbacks#Environment", function()
-        it("loader#callbacks", function()
+    describe("callbacks#Environment", function ()
+        it("loader#callbacks", function ()
             local env = Environment:new()
 
             local called = {}
@@ -462,7 +460,7 @@ describe("Environment tests", function()
             assert.Same({ "index.html", "other.html", "index.html" }, called)
         end)
 
-        it("reload#callbacks", function()
+        it("reload#callbacks", function ()
             local env = Environment:new()
 
             local called = {}
@@ -480,7 +478,7 @@ describe("Environment tests", function()
             assert.Same({ "index.html", "index.html", "other.html" }, called)
         end)
 
-        it("path-join#callbacks", function()
+        it("path-join#callbacks", function ()
             local env = Environment:new()
 
             local function path_join(name, parent)
@@ -497,7 +495,7 @@ describe("Environment tests", function()
             assert.Equal("I am baz!", rv)
         end)
 
-        it("uknown-method#callbacks", function()
+        it("uknown-method#callbacks", function ()
             local env = Environment:new()
 
             local function bar()
@@ -520,7 +518,7 @@ describe("Environment tests", function()
             assert.Equal("bar", rv)
         end)
 
-        it("pycompat#callbacks", function()
+        it("pycompat#callbacks", function ()
             local env = Environment:new()
             local source = "{'x': 42}.get('x')"
 
@@ -528,12 +526,12 @@ describe("Environment tests", function()
             assert.Equal(42, env:eval(source))
 
             env:set_pycompat(false)
-            assert.Error(function()
+            assert.Error(function ()
                 env:eval(source)
             end)
         end)
 
-        it("autoescape#callbacks", function()
+        it("autoescape#callbacks", function ()
             local env = Environment:new()
             local rv
 
@@ -555,7 +553,7 @@ describe("Environment tests", function()
             assert.Equal("Hello <x>", rv)
         end)
 
-        it("formatter#callbacks", function()
+        it("formatter#callbacks", function ()
             local env = Environment:new()
 
             local function formatter(state, value)
@@ -585,7 +583,7 @@ describe("Environment tests", function()
             assert.Equal("FALSE", env:render_str("{{ foo }}", { foo = false }))
             assert.Equal("FOO", env:render_str("{{ foo }}", { foo = "foo" }))
             assert.Equal("<table>", env:render_str("{{ foo }}", { foo = {} }))
-            assert.Equal("beep boop", env:render_str("{{ foo }}", { foo = function() end }))
+            assert.Equal("beep boop", env:render_str("{{ foo }}", { foo = function () end }))
             assert.Equal("~~~~~~", env:render_str("{{ foo }}", { foo = minijinja.Environment }))
         end)
     end)

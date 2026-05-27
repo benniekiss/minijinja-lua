@@ -1,7 +1,7 @@
 local minijinja = require("minijinja")
 local Environment = minijinja.Environment
 
-describe("State tests", function()
+describe("State tests", function ()
     local function state_func(state, _)
         assert.Equal("my_template", state:name())
         assert.Equal("none", state:auto_escape())
@@ -34,50 +34,47 @@ describe("State tests", function()
         env.fuel = 1000
 
         env:add_global("lua", state_func)
-        env:add_filter("state_filter", function(val)
-            return val:upper()
-        end, false)
-        env:add_test("state_test", function(val, arg)
-            return val == arg
-        end, false)
+        env:add_filter(
+            "state_filter",
+            function (val) return val:upper() end,
+            false
+        )
+        env:add_test(
+            "state_test",
+            function (val, arg) return val == arg end,
+            false
+        )
 
         local name = "my_template"
-        local source = "{% macro my_macro() %}my macro{% endmacro %}{% block test_block %}"
-            .. src
+        local source = "{% macro my_macro() %}my macro{% endmacro %}{% block test_block %}" .. src
             .. "{% endblock test_block %}"
 
-        local ctx = {
-            foo = "foo",
-            func = function()
-                return 42
-            end,
-            bar = { baz = true },
-        }
+        local ctx = { foo = "foo", func = function () return 42 end, bar = { baz = true } }
 
         return env, name, source, ctx
     end
 
-    it("filter#State", function()
+    it("filter#State", function ()
         local env, name, source, ctx = setup("{{ foo | lua }}")
         env:add_filter("lua", state_func)
 
         env:render_str(source, ctx, name)
     end)
 
-    it("test#State", function()
+    it("test#State", function ()
         local env, name, source, ctx = setup("{{ foo is lua }}")
         env:add_test("lua", state_func)
 
         env:render_str(source, ctx, name)
     end)
 
-    it("global#State", function()
+    it("global#State", function ()
         local env, name, source, ctx = setup("{{ lua() }}")
 
         env:render_str(source, ctx, name)
     end)
 
-    it("temps#State", function()
+    it("temps#State", function ()
         local env = Environment:empty()
 
         local first = true
@@ -88,9 +85,7 @@ describe("State tests", function()
                 first = false
             end
 
-            local new = state:get_or_set_temp("counter", function()
-                return 0
-            end) + 1
+            local new = state:get_or_set_temp("counter", function () return 0 end) + 1
             state:set_temp("counter", new)
             return new
         end
