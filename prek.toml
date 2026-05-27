@@ -24,7 +24,7 @@ repo = "local"
 # [[repos.hooks]]
 # id = "lx-check"
 # name = "lx check"
-# entry = "lx check"
+# entry = "lx --no-luarc --lua-version 5.4 check"
 # language = "system"
 # pass_filenames = false
 # files = { glob = ["*.lua"] }
@@ -33,7 +33,7 @@ repo = "local"
 [[repos.hooks]]
 id = "lx-lint"
 name = "lx lint"
-entry = "lx --lua-version 5.4 lint -- -g -q -u --no-max-line-length"
+entry = "lx --no-luarc --lua-version 5.4 lint -- -g -q -u --no-max-line-length"
 language = "system"
 pass_filenames = true
 files = { glob = ["*.lua"] }
@@ -42,7 +42,7 @@ exclude = { glob = [".lux/**"] }
 [[repos.hooks]]
 id = "lx-fmt"
 name = "lx fmt"
-entry = "lx --lua-version 5.4 fmt --backend luafmt"
+entry = "lx --no-luarc --lua-version 5.4 fmt --backend luafmt"
 language = "system"
 pass_filenames = 1
 files = { glob = ["*.lua"] }
