@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.22](https://github.com/benniekiss/minijinja-lua/compare/v0.1.21...v0.1.22) - 2026-05-27
+
+### Fixed
+
+- *(ci)* don't update emmyrc.json when syncing project
+- *(ci)* dont use runuser
+- *(ci)* pass entrypoint to renovate
+- try manually installing rust nightly
+
+### Other
+
+- *(ci)* try prek without cache
+- use locked instead of frozen
+- don't generate a luarc file with lx commands
+- format with luafmt
+- update project config
+- update cargo deps
+- strip all panic formatting symbols
+- renovate entrypoint has no impact
+- pass `ptimize_for_size` to build-std-features
+- *(deps)* update rust to nightly-2026-05-26 ([#55](https://github.com/benniekiss/minijinja-lua/pull/55))
+- *(deps)* update rust to nightly-2026-05-25 ([#53](https://github.com/benniekiss/minijinja-lua/pull/53))
+
 ## [0.1.21](https://github.com/benniekiss/minijinja-lua/compare/v0.1.20...v0.1.21) - 2026-05-21
 
 ### Fixed
