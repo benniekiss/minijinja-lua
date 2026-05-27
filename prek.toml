@@ -51,7 +51,7 @@ exclude = { glob = [".lux/**"] }
 [[repos.hooks]]
 id = "cargo-clippy"
 name = "cargo clippy"
-entry = "cargo clippy --frozen"
+entry = "cargo clippy --locked"
 language = "system"
 pass_filenames = false
 files = { glob = ["*.rs"] }
