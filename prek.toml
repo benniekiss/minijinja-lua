@@ -7,7 +7,7 @@ repo = "builtin"
 
 [[repos.hooks]]
 id = "trailing-whitespace"
-args = [ "--markdown-linebreak-ext=md" ]
+args = ["--markdown-linebreak-ext=md"]
 
 [[repos.hooks]]
 id = "end-of-file-fixer"
@@ -15,7 +15,7 @@ exclude = { glob = ["*.lock"] }
 
 [[repos.hooks]]
 id = "check-added-large-files"
-args = [ "--maxkb=1000" ]
+args = ["--maxkb=1000"]
 
 [[repos]]
 repo = "local"
@@ -33,7 +33,7 @@ repo = "local"
 [[repos.hooks]]
 id = "lx-lint"
 name = "lx lint"
-entry = "lx --lua-version 5.4 lint -- -g -u -q --no-max-line-length --exclude-files .lux/**"
+entry = "lx --lua-version 5.4 lint -- -g -q -u --no-max-line-length"
 language = "system"
 pass_filenames = true
 files = { glob = ["*.lua"] }
@@ -42,24 +42,16 @@ exclude = { glob = [".lux/**"] }
 [[repos.hooks]]
 id = "lx-fmt"
 name = "lx fmt"
-entry = "lx fmt"
+entry = "lx --lua-version 5.4 fmt --backend luafmt"
 language = "system"
-pass_filenames = false
+pass_filenames = 1
 files = { glob = ["*.lua"] }
 exclude = { glob = [".lux/**"] }
 
 [[repos.hooks]]
-id = "cargo-check"
-name = "cargo check"
-entry = "cargo check"
-language = "system"
-pass_filenames = false
-files = { glob = ["*.rs"] }
-
-[[repos.hooks]]
 id = "cargo-clippy"
 name = "cargo clippy"
-entry = "cargo clippy"
+entry = "cargo clippy --frozen"
 language = "system"
 pass_filenames = false
 files = { glob = ["*.rs"] }
@@ -67,7 +59,7 @@ files = { glob = ["*.rs"] }
 [[repos.hooks]]
 id = "cargo-fmt"
 name = "cargo fmt"
-entry = "cargo fmt"
+entry = "cargo fmt --"
 language = "system"
-pass_filenames = false
+pass_filenames = true
 files = { glob = ["*.rs"] }
