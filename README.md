@@ -1,3 +1,5 @@
+**Project has been relocated to https://github.com/benniekiss/rs-mod-lua**
+
 # minijinja-lua
 
 ![License](https://img.shields.io/github/license/benniekiss/minijinja-lua)
